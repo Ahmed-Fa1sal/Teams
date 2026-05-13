@@ -30,8 +30,9 @@ public class Notification {
     @Column(columnDefinition = "TEXT")
     private String message;
 
-    @Column
-    private String type;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private NotificationType type;
 
     @Column
     private String relatedEntityId;
