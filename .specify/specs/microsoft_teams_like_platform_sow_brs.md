@@ -383,7 +383,7 @@ The platform shall track important actions.
 
 - JWT authentication
 - HTTPS enforcement
-- Password hashing using BCrypt/Argon2
+- Password hashing using BCrypt/Argon2 
 - Input validation
 - SQL injection prevention
 - XSS protection

@@ -76,10 +76,11 @@ public class AttachmentServiceImpl implements AttachmentService {
             // Create attachment entity
             Attachment attachment = Attachment.builder()
                     .message(message)
-                    .fileName(originalFilename)
+                    .originalFilename(originalFilename)
+                    .storedFilename(uniqueFilename)
                     .fileType(file.getContentType())
                     .fileSize(file.getSize())
-                    .fileUrl("/api/v1/attachments/" + UUID.randomUUID() + "/download")
+                    .filePath(filePath.toString())
                     .uploadedBy(uploader)
                     .build();
 
@@ -119,8 +120,7 @@ public class AttachmentServiceImpl implements AttachmentService {
 
         try {
             // Delete file from disk
-            Path filePath = Paths.get(uploadDir, attachment.getMessage().getId().toString(),
-                    attachment.getFileUrl().substring(attachment.getFileUrl().lastIndexOf("/") + 1));
+            Path filePath = Paths.get(attachment.getFilePath());
             Files.deleteIfExists(filePath);
         } catch (IOException e) {
             // Log but don't fail - file may already be deleted
@@ -137,8 +137,7 @@ public class AttachmentServiceImpl implements AttachmentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Attachment not found with id: " + id));
 
         try {
-            Path filePath = Paths.get(uploadDir, attachment.getMessage().getId().toString(),
-                    attachment.getFileUrl().substring(attachment.getFileUrl().lastIndexOf("/") + 1));
+            Path filePath = Paths.get(attachment.getFilePath());
             return Files.readAllBytes(filePath);
         } catch (IOException e) {
             throw new BadRequestException("Failed to download attachment: " + e.getMessage());
@@ -154,10 +153,10 @@ public class AttachmentServiceImpl implements AttachmentService {
 
         return AttachmentDto.builder()
                 .id(attachment.getId())
-                .fileName(attachment.getFileName())
+                .fileName(attachment.getOriginalFilename())
                 .fileType(attachment.getFileType())
                 .fileSize(attachment.getFileSize())
-                .fileUrl(attachment.getFileUrl())
+                .fileUrl("/api/v1/attachments/" + attachment.getId() + "/download")
                 .messageId(attachment.getMessage().getId())
                 .uploadedBy(userService.toUserDto(attachment.getUploadedBy()))
                 .createdAt(attachment.getCreatedAt())
