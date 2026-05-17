@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 
 import java.time.LocalDateTime;
 
@@ -44,9 +46,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex, HttpServletRequest request) {
+    // Override the parent handler to avoid ambiguity and provide a consistent response body
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+                                                                  HttpHeaders headers,
+                                                                  HttpStatusCode status,
+                                                                  WebRequest request) {
         FieldError fieldError = (FieldError) ex.getBindingResult().getAllErrors().get(0);
         ApiResponse.ErrorDetails errorDetails = new ApiResponse.ErrorDetails(
                 fieldError.getField(),
@@ -56,7 +61,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         ApiResponse<?> response = new ApiResponse<>(400, "Validation failed", errorDetails);
         response.setTimestamp(LocalDateTime.now());
-        response.setPath(request.getRequestURI());
+        // WebRequest does not expose URI directly; leave path null or extract if HttpServletRequest is available
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
