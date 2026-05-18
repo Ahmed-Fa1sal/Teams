@@ -13,6 +13,7 @@ import com.teams.teams.service.AuthService;
 import com.teams.teams.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -85,21 +86,22 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponse login(LoginRequest loginRequest) {
+        // Find user first for pre-auth checks
+        User user = userRepository.findByEmail(loginRequest.getEmail())
+                .orElseThrow(() -> new BadRequestException("Invalid username or password"));
+
+        if (!user.isEnabled()) {
+            throw new BadRequestException("User account is disabled");
+        }
+
+        if (!user.isAccountNonLocked()) {
+            throw new BadRequestException("User account is locked due to too many failed login attempts");
+        }
+
         try {
-            User user = userRepository.findByUsername(loginRequest.getUsername())
-                    .orElseThrow(() -> new BadRequestException("Invalid username or password"));
-
-            if (!user.isEnabled()) {
-                throw new BadRequestException("User account is disabled");
-            }
-
-            if (!user.isAccountNonLocked()) {
-                throw new BadRequestException("User account is locked due to too many failed login attempts");
-            }
-
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            loginRequest.getUsername(),
+                            loginRequest.getEmail(),
                             loginRequest.getPassword()
                     )
             );
@@ -118,14 +120,14 @@ public class AuthServiceImpl implements AuthService {
                     .expiresIn(jwtExpirationMs / 1000)
                     .user(userService.toUserDto(user))
                     .build();
-        } catch (Exception ex) {
-            User user = userRepository.findByUsername(loginRequest.getUsername()).orElse(null);
-            if (user != null) {
-                user.incrementFailedLoginAttempts();
-                userRepository.save(user);
-            }
+
+        } catch (BadCredentialsException ex) {
+            // Only increment on actual bad password
+            user.incrementFailedLoginAttempts();
+            userRepository.save(user);
             throw new BadRequestException("Invalid username or password");
         }
+        // Let other exceptions (DisabledException, LockedException) propagate naturally
     }
 
     @Override

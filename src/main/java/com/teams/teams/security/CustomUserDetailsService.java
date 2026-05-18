@@ -17,8 +17,28 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+        // Try to load by username first
+        var user = userRepository.findByUsername(username);
+        if (user.isPresent()) {
+            return user.get();
+        }
+        
+        // If not found by username, try by email (supports email-based login)
+        if (isEmail(username)) {
+            user = userRepository.findByEmail(username);
+            if (user.isPresent()) {
+                return user.get();
+            }
+        }
+        
+        throw new UsernameNotFoundException("User not found: " + username);
+    }
+
+    /**
+     * Helper method to check if a string looks like an email address.
+     */
+    private boolean isEmail(String input) {
+        return input != null && input.contains("@");
     }
 }
 
