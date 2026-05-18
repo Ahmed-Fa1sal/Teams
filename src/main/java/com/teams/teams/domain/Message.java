@@ -66,9 +66,11 @@ public class Message {
     private LocalDateTime updatedAt = LocalDateTime.now();
 
     @Column
+    @Builder.Default
     private Boolean edited = false;
 
     @Column
+    @Builder.Default
     private Boolean deleted = false;
 
     @PreUpdate

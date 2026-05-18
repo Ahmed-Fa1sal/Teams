@@ -1,0 +1,15 @@
+package com.teams.teams.domain;
+
+public enum NotificationType {
+    MESSAGE_RECEIVED,
+    TEAM_INVITATION,
+    CHANNEL_INVITATION,
+    MEMBER_ADDED,
+    MEMBER_REMOVED,
+    TEAM_CREATED,
+    CHANNEL_CREATED,
+    MESSAGE_MENTION,
+    TEAM_UPDATED,
+    CHANNEL_UPDATED
+}
+
