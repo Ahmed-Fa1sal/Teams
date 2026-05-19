@@ -1,29 +1,33 @@
 package com.teams.teams.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
 @Table(name = "teams")
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Team extends BaseEntity {
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class Team {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
+    @ToString.Include
     private Long id;
 
     @Column(nullable = false)
+    @ToString.Include
     private String name;
 
     @Column(columnDefinition = "TEXT")
@@ -32,8 +36,9 @@ public class Team extends BaseEntity {
     @Column
     private String imageUrl;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "owner_id", nullable = false)
+    @ToString.Exclude
     private User owner;
 
     @Column(nullable = false)
@@ -44,29 +49,37 @@ public class Team extends BaseEntity {
     @Builder.Default
     private Boolean archived = false;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "team_members",
-            joinColumns = @JoinColumn(name = "team_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
+    @OneToMany(mappedBy = "team", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private Set<User> members = new HashSet<>();
+    @ToString.Exclude
+    private List<TeamMember> members = new ArrayList<>();
 
     @OneToMany(mappedBy = "team", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @Builder.Default
+    @ToString.Exclude
     private Set<Channel> channels = new HashSet<>();
 
-    // createdAt/updatedAt moved to BaseEntity
+    @Column(nullable = false, updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    public void addMember(User user) {
-        members.add(user);
-        user.getTeams().add(this);
+    @Column(nullable = false)
+    @Builder.Default
+    private LocalDateTime updatedAt = LocalDateTime.now();
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 
-    public void removeMember(User user) {
-        members.remove(user);
-        user.getTeams().remove(this);
+    public void addMember(User user, TeamMemberRole role) {
+        TeamMember member = TeamMember.builder()
+                .team(this)
+                .user(user)
+                .role(role)
+                .joinedAt(LocalDateTime.now())
+                .build();
+
+        members.add(member);
     }
 }
-

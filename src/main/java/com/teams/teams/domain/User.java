@@ -1,10 +1,7 @@
 package com.teams.teams.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,23 +13,31 @@ import java.util.Set;
 
 @Entity
 @Table(name = "users")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
+    @ToString.Include
     private Long id;
 
     @Column(unique = true, nullable = false)
+    @ToString.Include
     private String email;
 
     @Column(unique = true, nullable = false)
+    @ToString.Include
     private String username;
 
     @Column(nullable = false)
+    @ToString.Exclude
     private String password;
 
     @Column(nullable = false)
@@ -76,14 +81,17 @@ public class User implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     @Builder.Default
+    @ToString.Exclude
     private Set<Role> roles = new HashSet<>();
 
-    @ManyToMany(mappedBy = "members", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private Set<Team> teams = new HashSet<>();
+    @ToString.Exclude
+    private Set<TeamMember> teamMemberships = new HashSet<>();
 
     @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
     @Builder.Default
+    @ToString.Exclude
     private Set<Team> ownedTeams = new HashSet<>();
 
     @PreUpdate
@@ -94,9 +102,11 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Set<GrantedAuthority> authorities = new HashSet<>();
+
         for (Role role : roles) {
             authorities.add(new SimpleGrantedAuthority(role.getName()));
         }
+
         return authorities;
     }
 
@@ -132,4 +142,3 @@ public class User implements UserDetails {
         return firstName + " " + lastName;
     }
 }
-

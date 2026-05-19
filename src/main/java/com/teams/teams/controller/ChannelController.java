@@ -4,6 +4,7 @@ import com.teams.teams.dto.ApiResponse;
 import com.teams.teams.dto.ChannelDto;
 import com.teams.teams.dto.CreateChannelRequest;
 import com.teams.teams.dto.UpdateChannelRequest;
+import com.teams.teams.service.CurrentUserService;
 import com.teams.teams.service.ChannelService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -14,8 +15,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,16 +24,17 @@ import org.springframework.web.bind.annotation.*;
 public class ChannelController {
 
     private final ChannelService channelService;
+    private final CurrentUserService currentUserService;
 
-    public ChannelController(ChannelService channelService) {
+    public ChannelController(ChannelService channelService, CurrentUserService currentUserService) {
         this.channelService = channelService;
+        this.currentUserService = currentUserService;
     }
 
     @PostMapping
     @Operation(summary = "Create a new channel")
     public ResponseEntity<?> createChannel(@Valid @RequestBody CreateChannelRequest request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Long userId = Long.parseLong(auth.getName());
+        Long userId = currentUserService.getCurrentUserId();
 
         ChannelDto channel = channelService.createChannel(request, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(channel));
@@ -62,7 +62,7 @@ public class ChannelController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_TEAM_OWNER') or hasRole('ROLE_ORG_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_TEAM_OWNER') or hasAuthority('ROLE_ORG_ADMIN')")
     @Operation(summary = "Update channel")
     public ResponseEntity<?> updateChannel(@PathVariable Long id, @Valid @RequestBody UpdateChannelRequest request) {
         ChannelDto channel = channelService.updateChannel(id, request);
@@ -70,7 +70,7 @@ public class ChannelController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_TEAM_OWNER') or hasRole('ROLE_SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_TEAM_OWNER') or hasAuthority('ROLE_SYSTEM_ADMIN')")
     @Operation(summary = "Delete channel")
     public ResponseEntity<?> deleteChannel(@PathVariable Long id) {
         channelService.deleteChannel(id);
@@ -78,7 +78,7 @@ public class ChannelController {
     }
 
     @PostMapping("/{id}/members/{userId}")
-    @PreAuthorize("hasRole('ROLE_TEAM_OWNER') or hasRole('ROLE_ORG_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_TEAM_OWNER') or hasAuthority('ROLE_ORG_ADMIN')")
     @Operation(summary = "Add channel member")
     public ResponseEntity<?> addChannelMember(@PathVariable Long id, @PathVariable Long userId) {
         channelService.addChannelMember(id, userId);
@@ -86,7 +86,7 @@ public class ChannelController {
     }
 
     @DeleteMapping("/{id}/members/{userId}")
-    @PreAuthorize("hasRole('ROLE_TEAM_OWNER') or hasRole('ROLE_ORG_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_TEAM_OWNER') or hasAuthority('ROLE_ORG_ADMIN')")
     @Operation(summary = "Remove channel member")
     public ResponseEntity<?> removeChannelMember(@PathVariable Long id, @PathVariable Long userId) {
         channelService.removeChannelMember(id, userId);
@@ -94,7 +94,7 @@ public class ChannelController {
     }
 
     @PostMapping("/{id}/archive")
-    @PreAuthorize("hasRole('ROLE_TEAM_OWNER') or hasRole('ROLE_SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_TEAM_OWNER') or hasAuthority('ROLE_SYSTEM_ADMIN')")
     @Operation(summary = "Archive channel")
     public ResponseEntity<?> archiveChannel(@PathVariable Long id) {
         channelService.archiveChannel(id);
@@ -102,7 +102,7 @@ public class ChannelController {
     }
 
     @PostMapping("/{id}/unarchive")
-    @PreAuthorize("hasRole('ROLE_TEAM_OWNER') or hasRole('ROLE_SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_TEAM_OWNER') or hasAuthority('ROLE_SYSTEM_ADMIN')")
     @Operation(summary = "Unarchive channel")
     public ResponseEntity<?> unarchiveChannel(@PathVariable Long id) {
         channelService.unarchiveChannel(id);

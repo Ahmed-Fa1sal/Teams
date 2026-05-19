@@ -1,11 +1,7 @@
 package com.teams.teams.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -13,7 +9,8 @@ import java.time.LocalDateTime;
 @Table(name = "message_reads", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"message_id", "user_id"})
 })
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor

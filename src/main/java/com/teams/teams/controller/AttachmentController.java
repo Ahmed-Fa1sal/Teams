@@ -2,6 +2,7 @@ package com.teams.teams.controller;
 
 import com.teams.teams.dto.ApiResponse;
 import com.teams.teams.dto.AttachmentDto;
+import com.teams.teams.service.CurrentUserService;
 import com.teams.teams.service.AttachmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -12,8 +13,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,9 +23,11 @@ import org.springframework.web.multipart.MultipartFile;
 public class AttachmentController {
 
     private final AttachmentService attachmentService;
+    private final CurrentUserService currentUserService;
 
-    public AttachmentController(AttachmentService attachmentService) {
+    public AttachmentController(AttachmentService attachmentService, CurrentUserService currentUserService) {
         this.attachmentService = attachmentService;
+        this.currentUserService = currentUserService;
     }
 
     @PostMapping("/upload/{messageId}")
@@ -34,8 +35,7 @@ public class AttachmentController {
     public ResponseEntity<?> uploadAttachment(
             @PathVariable Long messageId,
             @RequestParam("file") MultipartFile file) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Long userId = Long.parseLong(auth.getName());
+        Long userId = currentUserService.getCurrentUserId();
 
         AttachmentDto attachment = attachmentService.uploadAttachment(messageId, file, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(attachment));
@@ -75,8 +75,7 @@ public class AttachmentController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete an attachment")
     public ResponseEntity<?> deleteAttachment(@PathVariable Long id) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Long userId = Long.parseLong(auth.getName());
+        Long userId = currentUserService.getCurrentUserId();
 
         attachmentService.deleteAttachment(id, userId);
         return ResponseEntity.ok(ApiResponse.success("Attachment deleted successfully"));

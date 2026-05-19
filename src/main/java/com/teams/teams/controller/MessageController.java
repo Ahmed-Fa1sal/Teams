@@ -4,6 +4,7 @@ import com.teams.teams.dto.ApiResponse;
 import com.teams.teams.dto.MessageDto;
 import com.teams.teams.dto.CreateMessageRequest;
 import com.teams.teams.dto.UpdateMessageRequest;
+import com.teams.teams.service.CurrentUserService;
 import com.teams.teams.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -13,9 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,16 +23,17 @@ import org.springframework.web.bind.annotation.*;
 public class MessageController {
 
     private final MessageService messageService;
+    private final CurrentUserService currentUserService;
 
-    public MessageController(MessageService messageService) {
+    public MessageController(MessageService messageService, CurrentUserService currentUserService) {
         this.messageService = messageService;
+        this.currentUserService = currentUserService;
     }
 
     @PostMapping
     @Operation(summary = "Create a new message")
     public ResponseEntity<?> createMessage(@Valid @RequestBody CreateMessageRequest request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Long userId = Long.parseLong(auth.getName());
+        Long userId = currentUserService.getCurrentUserId();
 
         MessageDto message = messageService.createMessage(request, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(message));
@@ -78,8 +77,7 @@ public class MessageController {
     @PutMapping("/{id}")
     @Operation(summary = "Update message")
     public ResponseEntity<?> updateMessage(@PathVariable Long id, @Valid @RequestBody UpdateMessageRequest request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Long userId = Long.parseLong(auth.getName());
+        Long userId = currentUserService.getCurrentUserId();
 
         MessageDto message = messageService.updateMessage(id, request, userId);
         return ResponseEntity.ok(ApiResponse.success("Message updated successfully", message));
@@ -88,8 +86,7 @@ public class MessageController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete message")
     public ResponseEntity<?> deleteMessage(@PathVariable Long id) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Long userId = Long.parseLong(auth.getName());
+        Long userId = currentUserService.getCurrentUserId();
 
         messageService.deleteMessage(id, userId);
         return ResponseEntity.ok(ApiResponse.success("Message deleted successfully"));

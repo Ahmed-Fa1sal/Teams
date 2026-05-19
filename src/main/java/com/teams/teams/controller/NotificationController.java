@@ -2,6 +2,7 @@ package com.teams.teams.controller;
 
 import com.teams.teams.dto.ApiResponse;
 import com.teams.teams.dto.NotificationDto;
+import com.teams.teams.service.CurrentUserService;
 import com.teams.teams.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -9,8 +10,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,16 +19,17 @@ import org.springframework.web.bind.annotation.*;
 public class NotificationController {
 
     private final NotificationService notificationService;
+    private final CurrentUserService currentUserService;
 
-    public NotificationController(NotificationService notificationService) {
+    public NotificationController(NotificationService notificationService, CurrentUserService currentUserService) {
         this.notificationService = notificationService;
+        this.currentUserService = currentUserService;
     }
 
     @GetMapping
     @Operation(summary = "Get user's notifications")
     public ResponseEntity<?> getUserNotifications(Pageable pageable) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Long userId = Long.parseLong(auth.getName());
+        Long userId = currentUserService.getCurrentUserId();
 
         Page<NotificationDto> notifications = notificationService.getUserNotifications(userId, pageable);
         return ResponseEntity.ok(ApiResponse.success("Notifications retrieved successfully", notifications));
@@ -38,8 +38,7 @@ public class NotificationController {
     @GetMapping("/unread")
     @Operation(summary = "Get user's unread notifications")
     public ResponseEntity<?> getUnreadNotifications(Pageable pageable) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Long userId = Long.parseLong(auth.getName());
+        Long userId = currentUserService.getCurrentUserId();
 
         Page<NotificationDto> notifications = notificationService.getUnreadNotifications(userId, pageable);
         return ResponseEntity.ok(ApiResponse.success("Unread notifications retrieved successfully", notifications));
@@ -62,8 +61,7 @@ public class NotificationController {
     @PostMapping("/read-all")
     @Operation(summary = "Mark all notifications as read")
     public ResponseEntity<?> markAllAsRead() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Long userId = Long.parseLong(auth.getName());
+        Long userId = currentUserService.getCurrentUserId();
 
         notificationService.markAllAsRead(userId);
         return ResponseEntity.ok(ApiResponse.success("All notifications marked as read"));

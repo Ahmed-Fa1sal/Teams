@@ -23,9 +23,9 @@ public class TeamDto {
     private Boolean isPublic;
     private Boolean archived;
     private Set<UserDto> members;
+    private Set<TeamMemberDto> teamMembers;
     private Integer memberCount;
     private Integer channelCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
-
