@@ -9,10 +9,9 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "roles")
 @Data
-@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class Role extends BaseEntity {
+public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
