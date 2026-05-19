@@ -16,6 +16,7 @@ import com.teams.teams.repository.MessageRepository;
 import com.teams.teams.repository.UserRepository;
 import com.teams.teams.service.MessageService;
 import com.teams.teams.service.UserService;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -46,7 +47,6 @@ public class MessageServiceImpl implements MessageService {
                 .content(request.getContent())
                 .sender(sender)
                 .edited(false)
-                .deleted(false)
                 .build();
 
         if (request.getChannelId() != null) {
@@ -105,6 +105,7 @@ public class MessageServiceImpl implements MessageService {
         }
 
         message.setDeleted(true);
+        message.setDeletedAt(LocalDateTime.now());
         messageRepository.save(message);
     }
 
@@ -145,7 +146,7 @@ public class MessageServiceImpl implements MessageService {
     @Override
     @Transactional(readOnly = true)
     public MessageDto toMessageDto(Message message) {
-        if (message == null || message.getDeleted()) {
+        if (message == null || message.isDeleted()) {
             return null;
         }
 
@@ -158,7 +159,7 @@ public class MessageServiceImpl implements MessageService {
                 .replyToId(message.getReplyTo() != null ? message.getReplyTo().getId() : null)
                 .replyToContent(message.getReplyTo() != null ? message.getReplyTo().getContent() : null)
                 .edited(message.getEdited())
-                .deleted(message.getDeleted())
+                .deleted(message.isDeleted())
                 .reactionCount(message.getReactions().size())
                 .replyCount(message.getReplies().size())
                 .createdAt(message.getCreatedAt())

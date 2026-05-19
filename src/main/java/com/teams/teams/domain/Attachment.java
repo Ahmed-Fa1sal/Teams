@@ -4,17 +4,19 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+ 
 
 @Entity
 @Table(name = "attachments")
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Attachment {
+public class Attachment extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,12 +45,7 @@ public class Attachment {
     @Column
     private String filePath;
 
-    @Column(nullable = false, updatable = false)
-    @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @Column
-    private LocalDateTime deletedAt;
+    // createdAt/updatedAt/deletedAt moved to BaseEntity
 
     public String getFileExtension() {
         if (originalFilename != null && originalFilename.contains(".")) {

@@ -4,19 +4,21 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+ 
 
 @Entity
 @Table(name = "message_reactions", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"message_id", "user_id", "emoji"})
 })
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MessageReaction {
+public class MessageReaction extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,9 +34,5 @@ public class MessageReaction {
 
     @Column(nullable = false)
     private String emoji;
-
-    @Column(nullable = false, updatable = false)
-    @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
 }
 

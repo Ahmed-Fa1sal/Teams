@@ -83,7 +83,10 @@ public class ChannelServiceImpl implements ChannelService {
     public void deleteChannel(Long id) {
         Channel channel = channelRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Channel not found with id: " + id));
-        channelRepository.delete(channel);
+        // Soft delete the channel by setting deleted flag and timestamp
+        channel.setDeleted(true);
+        channel.setDeletedAt(java.time.LocalDateTime.now());
+        channelRepository.save(channel);
     }
 
     @Override

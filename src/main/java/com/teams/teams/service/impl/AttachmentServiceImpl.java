@@ -118,16 +118,10 @@ public class AttachmentServiceImpl implements AttachmentService {
             throw new UnauthorizedException("You can only delete your own attachments");
         }
 
-        try {
-            // Delete file from disk
-            Path filePath = Paths.get(attachment.getFilePath());
-            Files.deleteIfExists(filePath);
-        } catch (IOException e) {
-            // Log but don't fail - file may already be deleted
-            System.err.println("Failed to delete attachment file: " + e.getMessage());
-        }
-
-        attachmentRepository.delete(attachment);
+        // Soft delete: mark deleted and record timestamp. Keep file on disk for recovery.
+        attachment.setDeleted(true);
+        attachment.setDeletedAt(java.time.LocalDateTime.now());
+        attachmentRepository.save(attachment);
     }
 
     @Override
