@@ -7,7 +7,8 @@ import lombok.*;
 @Table(name = "permissions")
 @Getter
 @Setter
-@EqualsAndHashCode(callSuper = true)
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class Permission extends BaseEntity {

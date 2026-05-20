@@ -9,7 +9,8 @@ import java.time.LocalDateTime;
 @Table(name = "notifications")
 @Getter
 @Setter
-@EqualsAndHashCode(callSuper = true)
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

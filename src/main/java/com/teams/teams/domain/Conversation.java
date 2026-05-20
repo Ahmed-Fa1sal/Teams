@@ -10,7 +10,8 @@ import java.util.Set;
 @Table(name = "conversations")
 @Getter
 @Setter
-@EqualsAndHashCode(callSuper = true)
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

@@ -1,0 +1,2 @@
+ALTER TABLE message_reads
+    ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NOT NULL DEFAULT now();

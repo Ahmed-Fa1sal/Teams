@@ -11,10 +11,11 @@ import java.time.LocalDateTime;
 })
 @Getter
 @Setter
-@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class MessageRead extends BaseEntity {
 
     @Id

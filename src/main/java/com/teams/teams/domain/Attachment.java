@@ -8,7 +8,8 @@ import lombok.*;
 @Table(name = "attachments")
 @Getter
 @Setter
-@EqualsAndHashCode(callSuper = true)
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
