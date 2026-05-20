@@ -31,80 +31,84 @@ public class ChannelController {
         this.currentUserService = currentUserService;
     }
 
-    @PostMapping
+    @PostMapping("/{teamId}")
     @Operation(summary = "Create a new channel")
-    public ResponseEntity<?> createChannel(@Valid @RequestBody CreateChannelRequest request) {
+    @PreAuthorize("@teamSecurityService.isTeamOwner(#teamId) or hasAuthority('ROLE_ORG_ADMIN') or hasAuthority('ROLE_SYSTEM_ADMIN')")
+    public ResponseEntity<?> createChannel(@PathVariable Long teamId, @Valid @RequestBody CreateChannelRequest request) {
         Long userId = currentUserService.getCurrentUserId();
 
         ChannelDto channel = channelService.createChannel(request, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(channel));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{teamId}/{id}")
     @Operation(summary = "Get channel by ID")
-    public ResponseEntity<?> getChannelById(@PathVariable Long id) {
+    @PreAuthorize("@teamSecurityService.isTeamMember(#teamId) or @teamSecurityService.isTeamOwner(#teamId) or @teamSecurityService.canManageTeam(#teamId) or hasAuthority('ROLE_ORG_ADMIN') or hasAuthority('ROLE_SYSTEM_ADMIN')")
+    public ResponseEntity<?> getChannelById(@PathVariable Long teamId, @PathVariable Long id) {
         ChannelDto channel = channelService.getChannelById(id);
         return ResponseEntity.ok(ApiResponse.success("Channel retrieved successfully", channel));
     }
 
     @GetMapping("/team/{teamId}")
     @Operation(summary = "Get all channels in a team")
+    @PreAuthorize("@teamSecurityService.isTeamMember(#teamId) or @teamSecurityService.isTeamOwner(#teamId) or @teamSecurityService.canManageTeam(#teamId) or hasAuthority('ROLE_ORG_ADMIN') or hasAuthority('ROLE_SYSTEM_ADMIN')")
     public ResponseEntity<?> getTeamChannels(@PathVariable Long teamId, Pageable pageable) {
         Page<ChannelDto> channels = channelService.getTeamChannels(teamId, pageable);
         return ResponseEntity.ok(ApiResponse.success("Team channels retrieved successfully", channels));
     }
 
-    @GetMapping("/search")
+    @GetMapping("/{teamId}/search")
     @Operation(summary = "Search channels")
-    public ResponseEntity<?> searchChannels(@RequestParam String query, Pageable pageable) {
+    @PreAuthorize("@teamSecurityService.isTeamMember(#teamId) or @teamSecurityService.isTeamOwner(#teamId) or @teamSecurityService.canManageTeam(#teamId) or hasAuthority('ROLE_ORG_ADMIN') or hasAuthority('ROLE_SYSTEM_ADMIN')")
+    public ResponseEntity<?> searchChannels(@PathVariable Long teamId, @RequestParam String query, Pageable pageable) {
         Page<ChannelDto> channels = channelService.searchChannels(query, pageable);
         return ResponseEntity.ok(ApiResponse.success("Search completed", channels));
     }
 
-    @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('ROLE_TEAM_OWNER') or hasAuthority('ROLE_ORG_ADMIN')")
+    @PutMapping("/{teamId}/{id}")
+    @PreAuthorize("@teamSecurityService.isTeamOwner(#teamId) or hasAuthority('ROLE_ORG_ADMIN') or hasAuthority('ROLE_SYSTEM_ADMIN')")
     @Operation(summary = "Update channel")
-    public ResponseEntity<?> updateChannel(@PathVariable Long id, @Valid @RequestBody UpdateChannelRequest request) {
+    public ResponseEntity<?> updateChannel(@PathVariable Long teamId, @PathVariable Long id, @Valid @RequestBody UpdateChannelRequest request) {
         ChannelDto channel = channelService.updateChannel(id, request);
         return ResponseEntity.ok(ApiResponse.success("Channel updated successfully", channel));
     }
 
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('ROLE_TEAM_OWNER') or hasAuthority('ROLE_SYSTEM_ADMIN')")
+    @DeleteMapping("/{teamId}/{id}")
+    @PreAuthorize("@teamSecurityService.isTeamOwner(#teamId) or hasAuthority('ROLE_ORG_ADMIN') or hasAuthority('ROLE_SYSTEM_ADMIN')")
     @Operation(summary = "Delete channel")
-    public ResponseEntity<?> deleteChannel(@PathVariable Long id) {
+    public ResponseEntity<?> deleteChannel(@PathVariable Long teamId, @PathVariable Long id) {
         channelService.deleteChannel(id);
         return ResponseEntity.ok(ApiResponse.success("Channel deleted successfully"));
     }
 
-    @PostMapping("/{id}/members/{userId}")
-    @PreAuthorize("hasAuthority('ROLE_TEAM_OWNER') or hasAuthority('ROLE_ORG_ADMIN')")
+    @PostMapping("/{teamId}/{id}/members/{userId}")
+    @PreAuthorize("@teamSecurityService.isTeamOwner(#teamId) or @teamSecurityService.canManageTeam(#teamId) or hasAuthority('ROLE_ORG_ADMIN') or hasAuthority('ROLE_SYSTEM_ADMIN')")
     @Operation(summary = "Add channel member")
-    public ResponseEntity<?> addChannelMember(@PathVariable Long id, @PathVariable Long userId) {
+    public ResponseEntity<?> addChannelMember(@PathVariable Long teamId, @PathVariable Long id, @PathVariable Long userId) {
         channelService.addChannelMember(id, userId);
         return ResponseEntity.ok(ApiResponse.success("Channel member added successfully"));
     }
 
-    @DeleteMapping("/{id}/members/{userId}")
-    @PreAuthorize("hasAuthority('ROLE_TEAM_OWNER') or hasAuthority('ROLE_ORG_ADMIN')")
+    @DeleteMapping("/{teamId}/{id}/members/{userId}")
+    @PreAuthorize("@teamSecurityService.isTeamOwner(#teamId) or @teamSecurityService.canManageTeam(#teamId) or hasAuthority('ROLE_ORG_ADMIN') or hasAuthority('ROLE_SYSTEM_ADMIN')")
     @Operation(summary = "Remove channel member")
-    public ResponseEntity<?> removeChannelMember(@PathVariable Long id, @PathVariable Long userId) {
+    public ResponseEntity<?> removeChannelMember(@PathVariable Long teamId, @PathVariable Long id, @PathVariable Long userId) {
         channelService.removeChannelMember(id, userId);
         return ResponseEntity.ok(ApiResponse.success("Channel member removed successfully"));
     }
 
-    @PostMapping("/{id}/archive")
-    @PreAuthorize("hasAuthority('ROLE_TEAM_OWNER') or hasAuthority('ROLE_SYSTEM_ADMIN')")
+    @PostMapping("/{teamId}/{id}/archive")
+    @PreAuthorize("@teamSecurityService.isTeamOwner(#teamId) or hasAuthority('ROLE_ORG_ADMIN') or hasAuthority('ROLE_SYSTEM_ADMIN')")
     @Operation(summary = "Archive channel")
-    public ResponseEntity<?> archiveChannel(@PathVariable Long id) {
+    public ResponseEntity<?> archiveChannel(@PathVariable Long teamId, @PathVariable Long id) {
         channelService.archiveChannel(id);
         return ResponseEntity.ok(ApiResponse.success("Channel archived successfully"));
     }
 
-    @PostMapping("/{id}/unarchive")
-    @PreAuthorize("hasAuthority('ROLE_TEAM_OWNER') or hasAuthority('ROLE_SYSTEM_ADMIN')")
+    @PostMapping("/{teamId}/{id}/unarchive")
+    @PreAuthorize("@teamSecurityService.isTeamOwner(#teamId) or hasAuthority('ROLE_ORG_ADMIN') or hasAuthority('ROLE_SYSTEM_ADMIN')")
     @Operation(summary = "Unarchive channel")
-    public ResponseEntity<?> unarchiveChannel(@PathVariable Long id) {
+    public ResponseEntity<?> unarchiveChannel(@PathVariable Long teamId, @PathVariable Long id) {
         channelService.unarchiveChannel(id);
         return ResponseEntity.ok(ApiResponse.success("Channel unarchived successfully"));
     }
