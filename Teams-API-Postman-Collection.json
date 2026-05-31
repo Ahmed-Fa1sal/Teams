@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "Teams Platform API - Phase 1, 2, 3",
-    "description": "Complete API collection for Teams collaboration platform with all endpoints from Phase 1 (Auth & Users), Phase 2 (Teams/Channels/Messages), and Phase 3 (Attachments/Notifications/AuditLogs)",
+    "name": "Teams Platform API - Phase 1, 2, 3, 4",
+    "description": "Complete API collection for Teams collaboration platform with all endpoints from Phase 1 (Auth & Users), Phase 2 (Teams/Channels/Messages), Phase 3 (Attachments/Notifications/AuditLogs), and Phase 4 (Organizations & Members)",
     "version": "1.0.0",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
@@ -45,6 +45,16 @@
       "key": "attachment_id",
       "value": "1",
       "type": "string"
+    },
+    {
+      "key": "organization_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "member_user_id",
+      "value": "2",
+      "type": "string"
     }
   ],
   "item": [
@@ -69,12 +79,7 @@
           ],
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\"email\": \"testuser@example.com\", \"password\": \"TestPassword123!\", \"firstName\": \"Test\", \"lastName\": \"User\"}"
@@ -110,12 +115,7 @@
           ],
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\"email\": \"testuser@example.com\", \"password\": \"TestPassword123!\"}"
@@ -137,12 +137,7 @@
               "raw": "{{base_url}}/auth/refresh?refreshToken={{refresh_token}}",
               "host": ["{{base_url}}"],
               "path": ["auth", "refresh"],
-              "query": [
-                {
-                  "key": "refreshToken",
-                  "value": "{{refresh_token}}"
-                }
-              ]
+              "query": [{ "key": "refreshToken", "value": "{{refresh_token}}" }]
             }
           },
           "response": []
@@ -151,12 +146,7 @@
           "name": "User Logout",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/auth/logout",
               "host": ["{{base_url}}"],
@@ -174,12 +164,7 @@
           "name": "Get User by ID",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/users/{{user_id}}",
               "host": ["{{base_url}}"],
@@ -192,26 +177,12 @@
           "name": "Get All Users (Paginated)",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/users?page=0&size=10",
               "host": ["{{base_url}}"],
               "path": ["users"],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "10"
-                }
-              ]
+              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }]
             }
           },
           "response": []
@@ -220,30 +191,12 @@
           "name": "Search Users",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/users/search?query=test&page=0&size=10",
               "host": ["{{base_url}}"],
               "path": ["users", "search"],
-              "query": [
-                {
-                  "key": "query",
-                  "value": "test"
-                },
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "10"
-                }
-              ]
+              "query": [{ "key": "query", "value": "test" }, { "key": "page", "value": "0" }, { "key": "size", "value": "10" }]
             }
           },
           "response": []
@@ -253,14 +206,8 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
@@ -278,12 +225,7 @@
           "name": "Delete User (Admin Only)",
           "request": {
             "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/users/{{user_id}}",
               "host": ["{{base_url}}"],
@@ -296,12 +238,7 @@
           "name": "Activate User (Admin Only)",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/users/{{user_id}}/activate",
               "host": ["{{base_url}}"],
@@ -314,12 +251,7 @@
           "name": "Deactivate User (Admin Only)",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/users/{{user_id}}/deactivate",
               "host": ["{{base_url}}"],
@@ -354,14 +286,8 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
@@ -379,12 +305,7 @@
           "name": "Get Team by ID",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/teams/{{team_id}}",
               "host": ["{{base_url}}"],
@@ -397,26 +318,12 @@
           "name": "Get All Teams",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/teams?page=0&size=10",
               "host": ["{{base_url}}"],
               "path": ["teams"],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "10"
-                }
-              ]
+              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }]
             }
           },
           "response": []
@@ -425,26 +332,12 @@
           "name": "Get User's Teams",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/teams/my-teams?page=0&size=10",
               "host": ["{{base_url}}"],
               "path": ["teams", "my-teams"],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "10"
-                }
-              ]
+              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }]
             }
           },
           "response": []
@@ -453,30 +346,12 @@
           "name": "Search Teams",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/teams/search?query=engineering&page=0&size=10",
               "host": ["{{base_url}}"],
               "path": ["teams", "search"],
-              "query": [
-                {
-                  "key": "query",
-                  "value": "engineering"
-                },
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "10"
-                }
-              ]
+              "query": [{ "key": "query", "value": "engineering" }, { "key": "page", "value": "0" }, { "key": "size", "value": "10" }]
             }
           },
           "response": []
@@ -486,14 +361,8 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
@@ -511,12 +380,7 @@
           "name": "Delete Team",
           "request": {
             "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/teams/{{team_id}}",
               "host": ["{{base_url}}"],
@@ -529,12 +393,7 @@
           "name": "Add Team Member",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/teams/{{team_id}}/members/2",
               "host": ["{{base_url}}"],
@@ -547,12 +406,7 @@
           "name": "Remove Team Member",
           "request": {
             "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/teams/{{team_id}}/members/2",
               "host": ["{{base_url}}"],
@@ -565,12 +419,7 @@
           "name": "Archive Team",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/teams/{{team_id}}/archive",
               "host": ["{{base_url}}"],
@@ -583,12 +432,7 @@
           "name": "Unarchive Team",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/teams/{{team_id}}/unarchive",
               "host": ["{{base_url}}"],
@@ -623,14 +467,8 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
@@ -648,12 +486,7 @@
           "name": "Get Channel by ID",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/channels/{{channel_id}}",
               "host": ["{{base_url}}"],
@@ -666,26 +499,12 @@
           "name": "Get Team Channels",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/channels/team/{{team_id}}?page=0&size=10",
               "host": ["{{base_url}}"],
               "path": ["channels", "team", "{{team_id}}"],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "10"
-                }
-              ]
+              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }]
             }
           },
           "response": []
@@ -694,30 +513,12 @@
           "name": "Search Channels",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/channels/search?query=general&page=0&size=10",
               "host": ["{{base_url}}"],
               "path": ["channels", "search"],
-              "query": [
-                {
-                  "key": "query",
-                  "value": "general"
-                },
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "10"
-                }
-              ]
+              "query": [{ "key": "query", "value": "general" }, { "key": "page", "value": "0" }, { "key": "size", "value": "10" }]
             }
           },
           "response": []
@@ -727,14 +528,8 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
@@ -752,12 +547,7 @@
           "name": "Delete Channel",
           "request": {
             "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/channels/{{channel_id}}",
               "host": ["{{base_url}}"],
@@ -770,12 +560,7 @@
           "name": "Add Channel Member",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/channels/{{channel_id}}/members/2",
               "host": ["{{base_url}}"],
@@ -788,12 +573,7 @@
           "name": "Remove Channel Member",
           "request": {
             "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/channels/{{channel_id}}/members/2",
               "host": ["{{base_url}}"],
@@ -806,12 +586,7 @@
           "name": "Archive Channel",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/channels/{{channel_id}}/archive",
               "host": ["{{base_url}}"],
@@ -824,12 +599,7 @@
           "name": "Unarchive Channel",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/channels/{{channel_id}}/unarchive",
               "host": ["{{base_url}}"],
@@ -864,14 +634,8 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
@@ -889,12 +653,7 @@
           "name": "Get Message by ID",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/messages/{{message_id}}",
               "host": ["{{base_url}}"],
@@ -907,26 +666,12 @@
           "name": "Get Channel Messages",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/messages/channel/{{channel_id}}?page=0&size=20",
               "host": ["{{base_url}}"],
               "path": ["messages", "channel", "{{channel_id}}"],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "20"
-                }
-              ]
+              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "20" }]
             }
           },
           "response": []
@@ -935,26 +680,12 @@
           "name": "Get Conversation Messages",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/messages/conversation/1?page=0&size=20",
               "host": ["{{base_url}}"],
               "path": ["messages", "conversation", "1"],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "20"
-                }
-              ]
+              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "20" }]
             }
           },
           "response": []
@@ -963,26 +694,12 @@
           "name": "Get Message Replies",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/messages/{{message_id}}/replies?page=0&size=10",
               "host": ["{{base_url}}"],
               "path": ["messages", "{{message_id}}", "replies"],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "10"
-                }
-              ]
+              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }]
             }
           },
           "response": []
@@ -991,30 +708,12 @@
           "name": "Search Messages",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/messages/search?query=hello&page=0&size=10",
               "host": ["{{base_url}}"],
               "path": ["messages", "search"],
-              "query": [
-                {
-                  "key": "query",
-                  "value": "hello"
-                },
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "10"
-                }
-              ]
+              "query": [{ "key": "query", "value": "hello" }, { "key": "page", "value": "0" }, { "key": "size", "value": "10" }]
             }
           },
           "response": []
@@ -1024,14 +723,8 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
@@ -1049,12 +742,7 @@
           "name": "Delete Message",
           "request": {
             "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/messages/{{message_id}}",
               "host": ["{{base_url}}"],
@@ -1072,26 +760,12 @@
           "name": "Get User Notifications",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/notifications?page=0&size=20",
               "host": ["{{base_url}}"],
               "path": ["notifications"],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "20"
-                }
-              ]
+              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "20" }]
             }
           },
           "response": []
@@ -1100,26 +774,12 @@
           "name": "Get Unread Notifications",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/notifications/unread?page=0&size=20",
               "host": ["{{base_url}}"],
               "path": ["notifications", "unread"],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "20"
-                }
-              ]
+              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "20" }]
             }
           },
           "response": []
@@ -1128,12 +788,7 @@
           "name": "Get Notification by ID",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/notifications/1",
               "host": ["{{base_url}}"],
@@ -1146,12 +801,7 @@
           "name": "Mark Notification as Read",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/notifications/1/read",
               "host": ["{{base_url}}"],
@@ -1164,12 +814,7 @@
           "name": "Mark All Notifications as Read",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/notifications/read-all",
               "host": ["{{base_url}}"],
@@ -1182,12 +827,7 @@
           "name": "Delete Notification",
           "request": {
             "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/notifications/1",
               "host": ["{{base_url}}"],
@@ -1205,21 +845,10 @@
           "name": "Upload Attachment",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "body": {
               "mode": "formdata",
-              "formdata": [
-                {
-                  "key": "file",
-                  "type": "file",
-                  "src": ""
-                }
-              ]
+              "formdata": [{ "key": "file", "type": "file", "src": "" }]
             },
             "url": {
               "raw": "{{base_url}}/attachments/upload/{{message_id}}",
@@ -1233,12 +862,7 @@
           "name": "Get Attachment by ID",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/attachments/{{attachment_id}}",
               "host": ["{{base_url}}"],
@@ -1251,26 +875,12 @@
           "name": "Get Message Attachments",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/attachments/message/{{message_id}}?page=0&size=10",
               "host": ["{{base_url}}"],
               "path": ["attachments", "message", "{{message_id}}"],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "10"
-                }
-              ]
+              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }]
             }
           },
           "response": []
@@ -1279,12 +889,7 @@
           "name": "Download Attachment",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/attachments/{{attachment_id}}/download",
               "host": ["{{base_url}}"],
@@ -1297,12 +902,7 @@
           "name": "Delete Attachment",
           "request": {
             "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/attachments/{{attachment_id}}",
               "host": ["{{base_url}}"],
@@ -1320,12 +920,7 @@
           "name": "Get Audit Log by ID (Admin Only)",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/audit-logs/1",
               "host": ["{{base_url}}"],
@@ -1338,26 +933,12 @@
           "name": "Get All Audit Logs (Admin Only)",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/audit-logs?page=0&size=20",
               "host": ["{{base_url}}"],
               "path": ["audit-logs"],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "20"
-                }
-              ]
+              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "20" }]
             }
           },
           "response": []
@@ -1366,26 +947,12 @@
           "name": "Get User Audit Logs (Admin Only)",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/audit-logs/user/{{user_id}}?page=0&size=20",
               "host": ["{{base_url}}"],
               "path": ["audit-logs", "user", "{{user_id}}"],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "20"
-                }
-              ]
+              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "20" }]
             }
           },
           "response": []
@@ -1394,26 +961,306 @@
           "name": "Get Entity Audit Logs (Admin Only)",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/audit-logs/entity/Team/1?page=0&size=20",
               "host": ["{{base_url}}"],
               "path": ["audit-logs", "entity", "Team", "1"],
+              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "20" }]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "PHASE 4 - Organizations",
+      "item": [
+        {
+          "name": "Create Organization",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var responseData = pm.response.json();",
+                  "    pm.environment.set('organization_id', responseData.data.id);",
+                  "    pm.test('Organization created successfully', function() {",
+                  "        pm.expect(pm.response.code).to.equal(201);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Acme Corp\", \"description\": \"My first organization\", \"tier\": \"FREE\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/organizations",
+              "host": ["{{base_url}}"],
+              "path": ["organizations"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Organization by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/organizations/{{organization_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["organizations", "{{organization_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Organizations",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/organizations?page=0&size=10&sortBy=name&sortDir=asc",
+              "host": ["{{base_url}}"],
+              "path": ["organizations"],
               "query": [
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "20"
-                }
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" },
+                { "key": "sortBy", "value": "name" },
+                { "key": "sortDir", "value": "asc" }
               ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Organizations",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/organizations/search?query=acme&page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["organizations", "search"],
+              "query": [
+                { "key": "query", "value": "acme" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Organizations",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/organizations/my?page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["organizations", "my"],
+              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Organization (ORG_ADMIN)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Acme Corp Updated\", \"description\": \"Updated description\", \"tier\": \"PROFESSIONAL\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/organizations/{{organization_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["organizations", "{{organization_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Activate Organization (ORG_ADMIN)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/organizations/{{organization_id}}/activate",
+              "host": ["{{base_url}}"],
+              "path": ["organizations", "{{organization_id}}", "activate"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deactivate Organization (ORG_ADMIN)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/organizations/{{organization_id}}/deactivate",
+              "host": ["{{base_url}}"],
+              "path": ["organizations", "{{organization_id}}", "deactivate"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Organization (ORG_ADMIN)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/organizations/{{organization_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["organizations", "{{organization_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "PHASE 4 - Organization Members",
+      "item": [
+        {
+          "name": "Add Member (ORG_ADMIN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.test('Member added successfully', function() {",
+                  "        pm.expect(pm.response.code).to.equal(201);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"userId\": {{member_user_id}}, \"role\": \"MEMBER\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/organizations/{{organization_id}}/members",
+              "host": ["{{base_url}}"],
+              "path": ["organizations", "{{organization_id}}", "members"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Members",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/organizations/{{organization_id}}/members?page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["organizations", "{{organization_id}}", "members"],
+              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Members by Role",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/organizations/{{organization_id}}/members?role=ORG_ADMIN&page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["organizations", "{{organization_id}}", "members"],
+              "query": [
+                { "key": "role", "value": "ORG_ADMIN" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Specific Member",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/organizations/{{organization_id}}/members/{{member_user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["organizations", "{{organization_id}}", "members", "{{member_user_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Member Role (ORG_ADMIN)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"role\": \"TEAM_ADMIN\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/organizations/{{organization_id}}/members/{{member_user_id}}/role",
+              "host": ["{{base_url}}"],
+              "path": ["organizations", "{{organization_id}}", "members", "{{member_user_id}}", "role"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Member (ORG_ADMIN)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/organizations/{{organization_id}}/members/{{member_user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["organizations", "{{organization_id}}", "members", "{{member_user_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Leave Organization (Self)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/organizations/{{organization_id}}/members/me/leave",
+              "host": ["{{base_url}}"],
+              "path": ["organizations", "{{organization_id}}", "members", "me", "leave"]
             }
           },
           "response": []
@@ -1453,4 +1300,3 @@
     }
   ]
 }
-

@@ -87,6 +87,11 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     @ToString.Exclude
+    private Set<OrganizationMember> organizationMemberships = new HashSet<>();
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    @ToString.Exclude
     private Set<TeamMember> teamMemberships = new HashSet<>();
 
     @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
