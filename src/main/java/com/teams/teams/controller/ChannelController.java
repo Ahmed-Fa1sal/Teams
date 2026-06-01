@@ -37,7 +37,7 @@ public class ChannelController {
     public ResponseEntity<?> createChannel(@PathVariable Long teamId, @Valid @RequestBody CreateChannelRequest request) {
         Long userId = currentUserService.getCurrentUserId();
 
-        ChannelDto channel = channelService.createChannel(request, userId);
+        ChannelDto channel = channelService.createChannel(teamId, request, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(channel));
     }
 

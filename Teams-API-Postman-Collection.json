@@ -82,7 +82,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\"email\": \"testuser@example.com\", \"password\": \"TestPassword123!\", \"firstName\": \"Test\", \"lastName\": \"User\"}"
+              "raw": "{\"email\": \"testuser@example.com\", \"password\": \"TestPassword123!\", \"firstName\": \"Test\", \"lastName\": \"User\",  \"username\": \"user\"}"
             },
             "url": {
               "raw": "{{base_url}}/auth/register",
@@ -442,28 +442,11 @@
           "response": []
         }
       ]
-    },
-    {
+    },{
       "name": "PHASE 2 - Channels Management",
       "item": [
         {
           "name": "Create Channel",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "if (pm.response.code === 201) {",
-                  "    var responseData = pm.response.json();",
-                  "    pm.environment.set('channel_id', responseData.data.id);",
-                  "    pm.test('Channel created successfully', function() {",
-                  "        pm.expect(pm.response.code).to.equal(201);",
-                  "    });",
-                  "}"
-                ]
-              }
-            }
-          ],
           "request": {
             "method": "POST",
             "header": [
@@ -472,56 +455,65 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"teamId\": {{team_id}}, \"name\": \"general\", \"description\": \"General discussion channel\", \"isPublic\": true}"
+              "raw": "{\"name\": \"general\", \"description\": \"General discussion channel\", \"isPublic\": true}"
             },
             "url": {
-              "raw": "{{base_url}}/channels",
+              "raw": "{{base_url}}/channels/{{team_id}}",
               "host": ["{{base_url}}"],
-              "path": ["channels"]
+              "path": ["channels", "{{team_id}}"]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Get Channel by ID",
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
             "url": {
-              "raw": "{{base_url}}/channels/{{channel_id}}",
+              "raw": "{{base_url}}/channels/{{team_id}}/{{channel_id}}",
               "host": ["{{base_url}}"],
-              "path": ["channels", "{{channel_id}}"]
+              "path": ["channels", "{{team_id}}", "{{channel_id}}"]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Get Team Channels",
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
             "url": {
               "raw": "{{base_url}}/channels/team/{{team_id}}?page=0&size=10",
               "host": ["{{base_url}}"],
               "path": ["channels", "team", "{{team_id}}"],
-              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }]
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Search Channels",
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
             "url": {
-              "raw": "{{base_url}}/channels/search?query=general&page=0&size=10",
+              "raw": "{{base_url}}/channels/{{team_id}}/search?query=general&page=0&size=10",
               "host": ["{{base_url}}"],
-              "path": ["channels", "search"],
-              "query": [{ "key": "query", "value": "general" }, { "key": "page", "value": "0" }, { "key": "size", "value": "10" }]
+              "path": ["channels", "{{team_id}}", "search"],
+              "query": [
+                { "key": "query", "value": "general" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Update Channel",
@@ -536,224 +528,84 @@
               "raw": "{\"name\": \"general-updated\", \"description\": \"Updated channel description\", \"isPublic\": true}"
             },
             "url": {
-              "raw": "{{base_url}}/channels/{{channel_id}}",
+              "raw": "{{base_url}}/channels/{{team_id}}/{{channel_id}}",
               "host": ["{{base_url}}"],
-              "path": ["channels", "{{channel_id}}"]
+              "path": ["channels", "{{team_id}}", "{{channel_id}}"]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Delete Channel",
           "request": {
             "method": "DELETE",
-            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
             "url": {
-              "raw": "{{base_url}}/channels/{{channel_id}}",
+              "raw": "{{base_url}}/channels/{{team_id}}/{{channel_id}}",
               "host": ["{{base_url}}"],
-              "path": ["channels", "{{channel_id}}"]
+              "path": ["channels", "{{team_id}}", "{{channel_id}}"]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Add Channel Member",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
             "url": {
-              "raw": "{{base_url}}/channels/{{channel_id}}/members/2",
+              "raw": "{{base_url}}/channels/{{team_id}}/{{channel_id}}/members/2",
               "host": ["{{base_url}}"],
-              "path": ["channels", "{{channel_id}}", "members", "2"]
+              "path": ["channels", "{{team_id}}", "{{channel_id}}", "members", "2"]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Remove Channel Member",
           "request": {
             "method": "DELETE",
-            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
             "url": {
-              "raw": "{{base_url}}/channels/{{channel_id}}/members/2",
+              "raw": "{{base_url}}/channels/{{team_id}}/{{channel_id}}/members/2",
               "host": ["{{base_url}}"],
-              "path": ["channels", "{{channel_id}}", "members", "2"]
+              "path": ["channels", "{{team_id}}", "{{channel_id}}", "members", "2"]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Archive Channel",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
             "url": {
-              "raw": "{{base_url}}/channels/{{channel_id}}/archive",
+              "raw": "{{base_url}}/channels/{{team_id}}/{{channel_id}}/archive",
               "host": ["{{base_url}}"],
-              "path": ["channels", "{{channel_id}}", "archive"]
+              "path": ["channels", "{{team_id}}", "{{channel_id}}", "archive"]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Unarchive Channel",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
             "url": {
-              "raw": "{{base_url}}/channels/{{channel_id}}/unarchive",
+              "raw": "{{base_url}}/channels/{{team_id}}/{{channel_id}}/unarchive",
               "host": ["{{base_url}}"],
-              "path": ["channels", "{{channel_id}}", "unarchive"]
+              "path": ["channels", "{{team_id}}", "{{channel_id}}", "unarchive"]
             }
-          },
-          "response": []
+          }
         }
       ]
-    },
-    {
-      "name": "PHASE 2 - Messaging System",
-      "item": [
-        {
-          "name": "Create Message",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "if (pm.response.code === 201) {",
-                  "    var responseData = pm.response.json();",
-                  "    pm.environment.set('message_id', responseData.data.id);",
-                  "    pm.test('Message created successfully', function() {",
-                  "        pm.expect(pm.response.code).to.equal(201);",
-                  "    });",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" },
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"channelId\": {{channel_id}}, \"content\": \"Hello team! This is my first message.\"}"
-            },
-            "url": {
-              "raw": "{{base_url}}/messages",
-              "host": ["{{base_url}}"],
-              "path": ["messages"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Message by ID",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
-            "url": {
-              "raw": "{{base_url}}/messages/{{message_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["messages", "{{message_id}}"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Channel Messages",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
-            "url": {
-              "raw": "{{base_url}}/messages/channel/{{channel_id}}?page=0&size=20",
-              "host": ["{{base_url}}"],
-              "path": ["messages", "channel", "{{channel_id}}"],
-              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "20" }]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Conversation Messages",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
-            "url": {
-              "raw": "{{base_url}}/messages/conversation/1?page=0&size=20",
-              "host": ["{{base_url}}"],
-              "path": ["messages", "conversation", "1"],
-              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "20" }]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Message Replies",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
-            "url": {
-              "raw": "{{base_url}}/messages/{{message_id}}/replies?page=0&size=10",
-              "host": ["{{base_url}}"],
-              "path": ["messages", "{{message_id}}", "replies"],
-              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Search Messages",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
-            "url": {
-              "raw": "{{base_url}}/messages/search?query=hello&page=0&size=10",
-              "host": ["{{base_url}}"],
-              "path": ["messages", "search"],
-              "query": [{ "key": "query", "value": "hello" }, { "key": "page", "value": "0" }, { "key": "size", "value": "10" }]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Update Message",
-          "request": {
-            "method": "PUT",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" },
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"content\": \"Updated message content\"}"
-            },
-            "url": {
-              "raw": "{{base_url}}/messages/{{message_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["messages", "{{message_id}}"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Delete Message",
-          "request": {
-            "method": "DELETE",
-            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
-            "url": {
-              "raw": "{{base_url}}/messages/{{message_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["messages", "{{message_id}}"]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
+    },{
       "name": "PHASE 3 - Notifications",
       "item": [
         {

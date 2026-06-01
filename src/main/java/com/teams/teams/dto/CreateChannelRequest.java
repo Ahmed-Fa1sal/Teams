@@ -14,9 +14,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CreateChannelRequest {
 
-    @NotNull(message = "Team ID is required")
-    private Long teamId;
-
     @NotBlank(message = "Channel name is required")
     @Size(min = 1, max = 255, message = "Channel name must be between 1 and 255 characters")
     private String name;
