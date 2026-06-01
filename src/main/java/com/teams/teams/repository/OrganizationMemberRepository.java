@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface OrganizationMemberRepository extends JpaRepository<OrganizationMember, Long> {
@@ -33,5 +34,19 @@ public interface OrganizationMemberRepository extends JpaRepository<Organization
     @Query("SELECT om FROM OrganizationMember om WHERE om.organization.id = :organizationId AND om.role = :role AND om.deleted = false")
     java.util.List<OrganizationMember> findAdminsByOrganizationAndRole(@Param("organizationId") Long organizationId,
                                                                        @Param("role") OrganizationMemberRole role);
+
+    boolean existsByOrganizationIdAndUserId(Long organizationId, Long userId);
+
+    boolean existsByOrganizationIdAndUserIdAndRole(
+            Long organizationId,
+            Long userId,
+            OrganizationMemberRole role
+    );
+
+    boolean existsByOrganizationIdAndUserIdAndRoleIn(
+            Long organizationId,
+            Long userId,
+            Set<OrganizationMemberRole> roles
+    );
 }
 
