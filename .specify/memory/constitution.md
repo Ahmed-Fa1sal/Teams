@@ -1,50 +1,52 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# Teams Collaboration Platform — Constitution
 
-## Core Principles
+A Microsoft Teams-like enterprise collaboration platform. **The Organization is the top-level boundary of all data and access.**
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+---
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+## Architecture
+- Four layers: Controller → Service → Repository → Database. No layer may skip another.
+- Controllers validate input and delegate. No business logic in controllers or repositories.
+- Services own all business logic and DTO mapping. Each service has an interface and one `Impl`.
+- Entities are never exposed via HTTP. DTOs are used for all API input and output.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+## Security
+- All endpoints require a valid JWT except auth and public documentation routes.
+- Every non-public controller method must have `@PreAuthorize`. Missing authorization is a blocking defect.
+- Passwords are hashed with BCrypt. JWT secrets and database credentials must never be committed.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+## Organization Boundaries
+- Hierarchy: `Organization → Team → Channel → Message`.
+- A Team must belong to an Organization. A Channel must belong to a Team.
+- A user may only act on a resource if they are an `OrganizationMember` of the owning organization.
+- Cross-organization data access is forbidden.
+- Every new entity scoped to an organization must carry an `organization_id` foreign key.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+## Database & Flyway
+- Hibernate must never generate or alter the schema (`ddl-auto=none`). Flyway owns all DDL.
+- Never modify an applied migration. All schema changes require a new versioned script.
+- Migration naming: `V{next_integer}__{Description}.sql`, sequential with no gaps.
+- Migrations must be idempotent.
+- Physical deletes are forbidden for user-facing entities. Use soft delete (`deleted`, `deleted_at`).
+- All queries on soft-deletable entities must filter `WHERE deleted = false`.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## API Standards
+- All endpoints are served under `/api/v1`. Breaking changes require a new version prefix.
+- All responses use the `ApiResponse<T>` envelope. List endpoints return `PagedResponse<T>`.
+- HTTP 500 responses must never expose stack traces.
+- Every controller and endpoint must have OpenAPI annotations (`@Tag`, `@Operation`).
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+## Auditing
+- All entities must extend `BaseEntity` to get `createdAt`, `updatedAt`, `createdBy`, `updatedBy` automatically.
+- Administrative actions must write an explicit `AuditLog` record from the service layer.
+- Audit logs are read-only via the API and restricted to admin roles.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## Backward Compatibility
+- Never remove or rename a stable API field without a versioned migration plan.
+- Database column renames require a Flyway migration before the Java rename is committed.
+- Enum values stored as strings are part of the schema contract. Renaming requires a data migration.
+- Do not introduce shared base services or generic CRUD abstractions across domain boundaries.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+---
 
-## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
-
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
-
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.2.0 | **Ratified**: 2026-06-01 | **Last Amended**: 2026-06-01
