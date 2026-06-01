@@ -291,7 +291,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"name\": \"Engineering Team\", \"description\": \"Main engineering team\", \"isPublic\": true}"
+                "raw": "{\"name\": \"Engineering Team\", \"description\": \"Main engineering team\", \"isPublic\": true, \"organization_id\": {{organization_id}}}"
             },
             "url": {
               "raw": "{{base_url}}/teams",
