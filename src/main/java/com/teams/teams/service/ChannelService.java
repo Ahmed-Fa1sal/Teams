@@ -8,7 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface ChannelService {
-    ChannelDto createChannel(CreateChannelRequest request, Long ownerId);
+    ChannelDto createChannel(Long teamId,CreateChannelRequest request, Long ownerId);
     ChannelDto getChannelById(Long id);
     ChannelDto updateChannel(Long id, UpdateChannelRequest request);
     void deleteChannel(Long id);

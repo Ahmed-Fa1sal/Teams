@@ -1,6 +1,8 @@
 package com.teams.teams.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,5 +26,8 @@ public class CreateTeamRequest {
 
     @Builder.Default
     private Boolean isPublic = true;
-}
 
+    @NotNull(message = "organization_id is required")
+    @JsonProperty("organization_id")
+    private Long organizationId;
+}

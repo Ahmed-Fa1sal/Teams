@@ -29,23 +29,39 @@ public class ChannelServiceImpl implements ChannelService {
     private final UserService userService;
 
     @Override
-    public ChannelDto createChannel(CreateChannelRequest request, Long ownerId) {
-        Team team = teamRepository.findById(request.getTeamId())
-                .orElseThrow(() -> new ResourceNotFoundException("Team not found with id: " + request.getTeamId()));
+    public ChannelDto createChannel(
+            Long teamId,
+            CreateChannelRequest request,
+            Long ownerId
+    ) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Team not found with id: " + teamId
+                        ));
 
         User owner = userRepository.findById(ownerId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + ownerId));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "User not found with id: " + ownerId
+                        ));
 
         Channel channel = Channel.builder()
                 .team(team)
                 .name(request.getName())
                 .description(request.getDescription())
-                .isPublic(request.getIsPublic() != null ? request.getIsPublic() : true)
+                .isPublic(
+                        request.getIsPublic() != null
+                                ? request.getIsPublic()
+                                : true
+                )
                 .owner(owner)
                 .build();
 
         channel.addMember(owner);
+
         Channel savedChannel = channelRepository.save(channel);
+
         return toChannelDto(savedChannel);
     }
 

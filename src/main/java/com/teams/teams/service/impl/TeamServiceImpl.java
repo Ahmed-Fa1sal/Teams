@@ -5,6 +5,8 @@ import com.teams.teams.domain.TeamMember;
 import com.teams.teams.domain.TeamMemberRole;
 import com.teams.teams.domain.User;
 import com.teams.teams.dto.CreateTeamRequest;
+import com.teams.teams.domain.Organization;
+import com.teams.teams.repository.OrganizationRepository;
 import com.teams.teams.dto.TeamDto;
 import com.teams.teams.dto.TeamMemberDto;
 import com.teams.teams.dto.UpdateTeamRequest;
@@ -34,11 +36,19 @@ public class TeamServiceImpl implements TeamService {
     private final TeamMemberRepository teamMemberRepository;
     private final UserRepository userRepository;
     private final UserService userService;
+    private final OrganizationRepository organizationRepository;
 
     @Override
     public TeamDto createTeam(CreateTeamRequest request, Long ownerId) {
         User owner = userRepository.findById(ownerId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + ownerId));
+
+        if (request.getOrganizationId() == null) {
+            throw new BadRequestException("organization_id is required");
+        }
+
+        Organization organization = organizationRepository.findById(request.getOrganizationId())
+                .orElseThrow(() -> new ResourceNotFoundException("Organization not found with id: " + request.getOrganizationId()));
 
         Team team = Team.builder()
                 .name(request.getName())
@@ -46,6 +56,7 @@ public class TeamServiceImpl implements TeamService {
                 .imageUrl(request.getImageUrl())
                 .isPublic(request.getIsPublic() != null ? request.getIsPublic() : true)
                 .owner(owner)
+                .organization(organization)
                 .build();
 
         team.addMember(owner, TeamMemberRole.OWNER);
