@@ -57,6 +57,14 @@ public class ChannelController {
         return ResponseEntity.ok(ApiResponse.success("Team channels retrieved successfully", channels));
     }
 
+    @GetMapping("/my-channels")
+    @Operation(summary = "Get all channels accessible by the current user")
+    public ResponseEntity<?> getMyChannels(Pageable pageable) {
+        Long userId = currentUserService.getCurrentUserId();
+        Page<ChannelDto> channels = channelService.getUserChannels(userId, pageable);
+        return ResponseEntity.ok(ApiResponse.success("User channels retrieved successfully", channels));
+    }
+
     @GetMapping("/{teamId}/search")
     @Operation(summary = "Search channels")
     @PreAuthorize("@teamSecurityService.isTeamMember(#teamId) or @teamSecurityService.isTeamOwner(#teamId) or @teamSecurityService.canManageTeam(#teamId) or hasAuthority('ROLE_ORG_ADMIN') or hasAuthority('ROLE_SYSTEM_ADMIN')")

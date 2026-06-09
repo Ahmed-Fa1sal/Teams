@@ -13,6 +13,7 @@ public interface ChannelService {
     ChannelDto updateChannel(Long id, UpdateChannelRequest request);
     void deleteChannel(Long id);
     Page<ChannelDto> getTeamChannels(Long teamId, Pageable pageable);
+    Page<ChannelDto> getUserChannels(Long userId, Pageable pageable);
     Page<ChannelDto> searchChannels(String query, Pageable pageable);
     void addChannelMember(Long channelId, Long userId);
     void removeChannelMember(Long channelId, Long userId);

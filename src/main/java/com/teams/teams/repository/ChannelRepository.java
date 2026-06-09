@@ -18,5 +18,20 @@ public interface ChannelRepository extends JpaRepository<Channel, Long> {
 
     @Query("SELECT c FROM Channel c WHERE LOWER(c.name) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(c.description) LIKE LOWER(CONCAT('%', :query, '%'))")
     Page<Channel> searchByNameOrDescription(@Param("query") String query, Pageable pageable);
+
+    @Query("""
+            SELECT DISTINCT c FROM Channel c
+            WHERE c.archived = false AND c.deleted = false
+              AND (
+                (c.isPublic = true AND EXISTS (
+                    SELECT tm FROM TeamMember tm
+                    WHERE tm.team = c.team AND tm.user.id = :userId
+                ))
+                OR EXISTS (
+                    SELECT u FROM c.members u WHERE u.id = :userId
+                )
+              )
+            """)
+    Page<Channel> findAccessibleByUserId(@Param("userId") Long userId, Pageable pageable);
 }
 

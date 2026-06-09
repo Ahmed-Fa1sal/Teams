@@ -116,6 +116,13 @@ public class ChannelServiceImpl implements ChannelService {
 
     @Override
     @Transactional(readOnly = true)
+    public Page<ChannelDto> getUserChannels(Long userId, Pageable pageable) {
+        return channelRepository.findAccessibleByUserId(userId, pageable)
+                .map(this::toChannelDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Page<ChannelDto> searchChannels(String query, Pageable pageable) {
         return channelRepository.searchByNameOrDescription(query, pageable)
                 .map(this::toChannelDto);
