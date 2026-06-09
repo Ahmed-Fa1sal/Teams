@@ -54,16 +54,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         organization = organizationRepository.save(organization);
 
-        // Automatically add creator as ORG_ADMIN
-        OrganizationMember adminMember = OrganizationMember.builder()
-                .organization(organization)
-                .user(creator)
-                .role(OrganizationMember.OrganizationMemberRole.ORG_ADMIN)
-                .build();
-
-        organizationMemberRepository.save(adminMember);
-        organization.addMember(adminMember);
-
         log.info("Organization created with id={}", organization.getId());
         return toResponse(organization);
     }

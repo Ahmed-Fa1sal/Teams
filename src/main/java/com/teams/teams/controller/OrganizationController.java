@@ -39,6 +39,7 @@ public class OrganizationController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('ROLE_SYSTEM_ADMIN')")
     @Operation(summary = "Create a new organization")
     public ResponseEntity<?> createOrganization(@Valid @RequestBody CreateOrganizationRequest request) {
         Long userId = currentUserService.getCurrentUserId();
