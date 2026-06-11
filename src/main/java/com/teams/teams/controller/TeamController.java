@@ -83,7 +83,9 @@ public class TeamController {
     @Operation(summary = "Update team")
     public ResponseEntity<?> updateTeam(@PathVariable Long id,
                                         @Valid @RequestBody UpdateTeamRequest request) {
-        TeamDto team = teamService.updateTeam(id, request);
+        Long userId = currentUserService.getCurrentUserId();
+
+        TeamDto team = teamService.updateTeam(id, request, userId);
 
         return ResponseEntity.ok(ApiResponse.success("Team updated successfully", team));
     }
@@ -102,7 +104,9 @@ public class TeamController {
     @Operation(summary = "Add team member")
     public ResponseEntity<?> addTeamMember(@PathVariable Long id,
                                            @PathVariable Long userId) {
-        teamService.addTeamMember(id, userId);
+        Long actorId = currentUserService.getCurrentUserId();
+
+        teamService.addTeamMember(id, userId, actorId);
 
         return ResponseEntity.ok(ApiResponse.success("Team member added successfully"));
     }
@@ -112,7 +116,9 @@ public class TeamController {
     @Operation(summary = "Remove team member")
     public ResponseEntity<?> removeTeamMember(@PathVariable Long id,
                                               @PathVariable Long userId) {
-        teamService.removeTeamMember(id, userId);
+        Long actorId = currentUserService.getCurrentUserId();
+
+        teamService.removeTeamMember(id, userId, actorId);
 
         return ResponseEntity.ok(ApiResponse.success("Team member removed successfully"));
     }

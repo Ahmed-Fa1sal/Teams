@@ -1,20 +1,17 @@
 package com.teams.teams.service.impl;
 
-import com.teams.teams.domain.Team;
-import com.teams.teams.domain.TeamMember;
-import com.teams.teams.domain.TeamMemberRole;
-import com.teams.teams.domain.User;
+import com.teams.teams.domain.*;
 import com.teams.teams.dto.CreateTeamRequest;
-import com.teams.teams.domain.Organization;
-import com.teams.teams.repository.OrganizationRepository;
 import com.teams.teams.dto.TeamDto;
 import com.teams.teams.dto.TeamMemberDto;
 import com.teams.teams.dto.UpdateTeamRequest;
 import com.teams.teams.exception.BadRequestException;
 import com.teams.teams.exception.ResourceNotFoundException;
+import com.teams.teams.repository.OrganizationRepository;
 import com.teams.teams.repository.TeamMemberRepository;
 import com.teams.teams.repository.TeamRepository;
 import com.teams.teams.repository.UserRepository;
+import com.teams.teams.service.NotificationService;
 import com.teams.teams.service.TeamService;
 import com.teams.teams.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +34,7 @@ public class TeamServiceImpl implements TeamService {
     private final UserRepository userRepository;
     private final UserService userService;
     private final OrganizationRepository organizationRepository;
+    private final NotificationService notificationService;
 
     @Override
     public TeamDto createTeam(CreateTeamRequest request, Long ownerId) {
@@ -77,6 +75,11 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public TeamDto updateTeam(Long id, UpdateTeamRequest request) {
+        return updateTeam(id, request, null);
+    }
+
+    @Override
+    public TeamDto updateTeam(Long id, UpdateTeamRequest request, Long actorId) {
         Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Team not found with id: " + id));
 
@@ -101,6 +104,16 @@ public class TeamServiceImpl implements TeamService {
         }
 
         Team updatedTeam = teamRepository.save(team);
+
+        notificationService.notifyTeamMembers(
+                updatedTeam.getId(),
+                actorId,
+                NotificationType.TEAM_UPDATED,
+                "Team updated",
+                updatedTeam.getName() + " was updated",
+                String.valueOf(updatedTeam.getId()),
+                "TEAM"
+        );
 
         return toTeamDto(updatedTeam);
     }
@@ -136,6 +149,11 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public void addTeamMember(Long teamId, Long userId) {
+        addTeamMember(teamId, userId, null);
+    }
+
+    @Override
+    public void addTeamMember(Long teamId, Long userId, Long actorId) {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new ResourceNotFoundException("Team not found with id: " + teamId));
 
@@ -154,10 +172,25 @@ public class TeamServiceImpl implements TeamService {
                 .build();
 
         teamMemberRepository.save(member);
+
+        notificationService.notifyUser(
+                userId,
+                actorId,
+                NotificationType.TEAM_ADDED,
+                "Added to team",
+                "You were added to " + team.getName(),
+                String.valueOf(team.getId()),
+                "TEAM"
+        );
     }
 
     @Override
     public void removeTeamMember(Long teamId, Long userId) {
+        removeTeamMember(teamId, userId, null);
+    }
+
+    @Override
+    public void removeTeamMember(Long teamId, Long userId, Long actorId) {
         TeamMember member = teamMemberRepository.findByTeamIdAndUserId(teamId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Team member not found"));
 
@@ -165,7 +198,19 @@ public class TeamServiceImpl implements TeamService {
             throw new BadRequestException("Team owner cannot be removed from the team");
         }
 
+        String teamName = member.getTeam().getName();
+
         teamMemberRepository.delete(member);
+
+        notificationService.notifyUser(
+                userId,
+                actorId,
+                NotificationType.TEAM_REMOVED,
+                "Removed from team",
+                "You were removed from " + teamName,
+                String.valueOf(teamId),
+                "TEAM"
+        );
     }
 
     @Override

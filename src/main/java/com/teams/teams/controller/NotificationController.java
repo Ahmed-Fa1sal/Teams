@@ -44,17 +44,30 @@ public class NotificationController {
         return ResponseEntity.ok(ApiResponse.success("Unread notifications retrieved successfully", notifications));
     }
 
+    @GetMapping("/unread/count")
+    @Operation(summary = "Get user's unread notification count")
+    public ResponseEntity<?> getUnreadNotificationCount() {
+        Long userId = currentUserService.getCurrentUserId();
+
+        long count = notificationService.getUnreadCount(userId);
+        return ResponseEntity.ok(ApiResponse.success("Unread notification count retrieved successfully", count));
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Get notification by ID")
     public ResponseEntity<?> getNotificationById(@PathVariable Long id) {
-        NotificationDto notification = notificationService.getNotificationById(id);
+        Long userId = currentUserService.getCurrentUserId();
+
+        NotificationDto notification = notificationService.getNotificationById(id, userId);
         return ResponseEntity.ok(ApiResponse.success("Notification retrieved successfully", notification));
     }
 
     @PostMapping("/{id}/read")
     @Operation(summary = "Mark notification as read")
     public ResponseEntity<?> markAsRead(@PathVariable Long id) {
-        notificationService.markAsRead(id);
+        Long userId = currentUserService.getCurrentUserId();
+
+        notificationService.markAsRead(id, userId);
         return ResponseEntity.ok(ApiResponse.success("Notification marked as read"));
     }
 
@@ -70,7 +83,9 @@ public class NotificationController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete notification")
     public ResponseEntity<?> deleteNotification(@PathVariable Long id) {
-        notificationService.deleteNotification(id);
+        Long userId = currentUserService.getCurrentUserId();
+
+        notificationService.deleteNotification(id, userId);
         return ResponseEntity.ok(ApiResponse.success("Notification deleted successfully"));
     }
 }
