@@ -1,6 +1,7 @@
 package com.teams.teams.service.impl;
 
 import com.teams.teams.domain.Channel;
+import com.teams.teams.domain.NotificationType;
 import com.teams.teams.domain.Team;
 import com.teams.teams.domain.User;
 import com.teams.teams.dto.ChannelDto;
@@ -11,6 +12,7 @@ import com.teams.teams.repository.ChannelRepository;
 import com.teams.teams.repository.TeamRepository;
 import com.teams.teams.repository.UserRepository;
 import com.teams.teams.service.ChannelService;
+import com.teams.teams.service.NotificationService;
 import com.teams.teams.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -27,6 +29,7 @@ public class ChannelServiceImpl implements ChannelService {
     private final TeamRepository teamRepository;
     private final UserRepository userRepository;
     private final UserService userService;
+    private final NotificationService notificationService;
 
     @Override
     public ChannelDto createChannel(
@@ -75,6 +78,11 @@ public class ChannelServiceImpl implements ChannelService {
 
     @Override
     public ChannelDto updateChannel(Long id, UpdateChannelRequest request) {
+        return updateChannel(id, request, null);
+    }
+
+    @Override
+    public ChannelDto updateChannel(Long id, UpdateChannelRequest request, Long actorId) {
         Channel channel = channelRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Channel not found with id: " + id));
 
@@ -92,6 +100,17 @@ public class ChannelServiceImpl implements ChannelService {
         }
 
         Channel updatedChannel = channelRepository.save(channel);
+
+        notificationService.notifyChannelMembers(
+                updatedChannel.getId(),
+                actorId,
+                NotificationType.CHANNEL_UPDATED,
+                "Channel updated",
+                updatedChannel.getName() + " was updated",
+                String.valueOf(updatedChannel.getId()),
+                "CHANNEL"
+        );
+
         return toChannelDto(updatedChannel);
     }
 
@@ -130,24 +149,65 @@ public class ChannelServiceImpl implements ChannelService {
 
     @Override
     public void addChannelMember(Long channelId, Long userId) {
+        addChannelMember(channelId, userId, null);
+    }
+
+    @Override
+    public void addChannelMember(Long channelId, Long userId, Long actorId) {
         Channel channel = channelRepository.findById(channelId)
                 .orElseThrow(() -> new ResourceNotFoundException("Channel not found with id: " + channelId));
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
+        boolean alreadyMember = channel.getMembers().stream()
+                .anyMatch(member -> member.getId().equals(userId));
+
         channel.addMember(user);
         channelRepository.save(channel);
+
+        if (!alreadyMember) {
+            notificationService.notifyUser(
+                    userId,
+                    actorId,
+                    NotificationType.CHANNEL_ADDED,
+                    "Added to channel",
+                    "You were added to " + channel.getName(),
+                    String.valueOf(channel.getId()),
+                    "CHANNEL"
+            );
+        }
     }
 
     @Override
     public void removeChannelMember(Long channelId, Long userId) {
+        removeChannelMember(channelId, userId, null);
+    }
+
+    @Override
+    public void removeChannelMember(Long channelId, Long userId, Long actorId) {
         Channel channel = channelRepository.findById(channelId)
                 .orElseThrow(() -> new ResourceNotFoundException("Channel not found with id: " + channelId));
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
+        String channelName = channel.getName();
+        boolean wasMember = channel.getMembers().stream()
+                .anyMatch(member -> member.getId().equals(userId));
+
         channel.removeMember(user);
         channelRepository.save(channel);
+
+        if (wasMember) {
+            notificationService.notifyUser(
+                    userId,
+                    actorId,
+                    NotificationType.CHANNEL_REMOVED,
+                    "Removed from channel",
+                    "You were removed from " + channelName,
+                    String.valueOf(channelId),
+                    "CHANNEL"
+            );
+        }
     }
 
     @Override

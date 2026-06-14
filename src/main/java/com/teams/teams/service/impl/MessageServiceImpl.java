@@ -1,11 +1,8 @@
 package com.teams.teams.service.impl;
 
-import com.teams.teams.domain.Channel;
-import com.teams.teams.domain.Conversation;
-import com.teams.teams.domain.Message;
-import com.teams.teams.domain.User;
-import com.teams.teams.dto.MessageDto;
+import com.teams.teams.domain.*;
 import com.teams.teams.dto.CreateMessageRequest;
+import com.teams.teams.dto.MessageDto;
 import com.teams.teams.dto.UpdateMessageRequest;
 import com.teams.teams.exception.BadRequestException;
 import com.teams.teams.exception.ResourceNotFoundException;
@@ -15,13 +12,17 @@ import com.teams.teams.repository.ConversationRepository;
 import com.teams.teams.repository.MessageRepository;
 import com.teams.teams.repository.UserRepository;
 import com.teams.teams.service.MessageService;
+import com.teams.teams.service.NotificationService;
 import com.teams.teams.service.UserService;
-import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +34,7 @@ public class MessageServiceImpl implements MessageService {
     private final ConversationRepository conversationRepository;
     private final UserRepository userRepository;
     private final UserService userService;
+    private final NotificationService notificationService;
 
     @Override
     public MessageDto createMessage(CreateMessageRequest request, Long senderId) {
@@ -61,13 +63,40 @@ public class MessageServiceImpl implements MessageService {
             message.setConversation(conversation);
         }
 
+        Message replyTo = null;
         if (request.getReplyToId() != null) {
-            Message replyTo = messageRepository.findById(request.getReplyToId())
+            replyTo = messageRepository.findById(request.getReplyToId())
                     .orElseThrow(() -> new ResourceNotFoundException("Message not found with id: " + request.getReplyToId()));
             message.setReplyTo(replyTo);
         }
 
         Message savedMessage = messageRepository.save(message);
+
+        Set<Long> mentionedUserIds = request.getMentionedUserIds() == null
+                ? new LinkedHashSet<>()
+                : new LinkedHashSet<>(request.getMentionedUserIds());
+
+        Set<Long> excludedFromMessageNotifications = new LinkedHashSet<>(mentionedUserIds);
+        Long replyRecipientId = replyTo != null ? replyTo.getSender().getId() : null;
+        if (replyRecipientId != null && !replyRecipientId.equals(senderId)) {
+            excludedFromMessageNotifications.add(replyRecipientId);
+        }
+
+        notificationService.notifyMentionedUsers(mentionedUserIds, savedMessage, senderId);
+        notificationService.notifyMessageRecipients(savedMessage, senderId, excludedFromMessageNotifications);
+
+        if (replyRecipientId != null && !replyRecipientId.equals(senderId) && !mentionedUserIds.contains(replyRecipientId)) {
+            notificationService.notifyUser(
+                    replyRecipientId,
+                    senderId,
+                    NotificationType.MESSAGE_REPLY,
+                    "New reply",
+                    sender.getFullName() + " replied to your message",
+                    String.valueOf(savedMessage.getId()),
+                    "MESSAGE"
+            );
+        }
+
         return toMessageDto(savedMessage);
     }
 

@@ -4,8 +4,8 @@ import com.teams.teams.dto.ApiResponse;
 import com.teams.teams.dto.ChannelDto;
 import com.teams.teams.dto.CreateChannelRequest;
 import com.teams.teams.dto.UpdateChannelRequest;
-import com.teams.teams.service.CurrentUserService;
 import com.teams.teams.service.ChannelService;
+import com.teams.teams.service.CurrentUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -77,7 +77,9 @@ public class ChannelController {
     @PreAuthorize("@teamSecurityService.isTeamOwner(#teamId) or hasAuthority('ROLE_ORG_ADMIN') or hasAuthority('ROLE_SYSTEM_ADMIN')")
     @Operation(summary = "Update channel")
     public ResponseEntity<?> updateChannel(@PathVariable Long teamId, @PathVariable Long id, @Valid @RequestBody UpdateChannelRequest request) {
-        ChannelDto channel = channelService.updateChannel(id, request);
+        Long userId = currentUserService.getCurrentUserId();
+
+        ChannelDto channel = channelService.updateChannel(id, request, userId);
         return ResponseEntity.ok(ApiResponse.success("Channel updated successfully", channel));
     }
 
@@ -93,7 +95,9 @@ public class ChannelController {
     @PreAuthorize("@teamSecurityService.isTeamOwner(#teamId) or @teamSecurityService.canManageTeam(#teamId) or hasAuthority('ROLE_ORG_ADMIN') or hasAuthority('ROLE_SYSTEM_ADMIN')")
     @Operation(summary = "Add channel member")
     public ResponseEntity<?> addChannelMember(@PathVariable Long teamId, @PathVariable Long id, @PathVariable Long userId) {
-        channelService.addChannelMember(id, userId);
+        Long actorId = currentUserService.getCurrentUserId();
+
+        channelService.addChannelMember(id, userId, actorId);
         return ResponseEntity.ok(ApiResponse.success("Channel member added successfully"));
     }
 
@@ -101,7 +105,9 @@ public class ChannelController {
     @PreAuthorize("@teamSecurityService.isTeamOwner(#teamId) or @teamSecurityService.canManageTeam(#teamId) or hasAuthority('ROLE_ORG_ADMIN') or hasAuthority('ROLE_SYSTEM_ADMIN')")
     @Operation(summary = "Remove channel member")
     public ResponseEntity<?> removeChannelMember(@PathVariable Long teamId, @PathVariable Long id, @PathVariable Long userId) {
-        channelService.removeChannelMember(id, userId);
+        Long actorId = currentUserService.getCurrentUserId();
+
+        channelService.removeChannelMember(id, userId, actorId);
         return ResponseEntity.ok(ApiResponse.success("Channel member removed successfully"));
     }
 
