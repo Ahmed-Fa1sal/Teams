@@ -1,8 +1,8 @@
 {
   "info": {
-    "name": "Teams Platform API - Phase 1, 2, 3, 4",
-    "description": "Complete API collection for Teams collaboration platform with all endpoints from Phase 1 (Auth & Users), Phase 2 (Teams/Channels/Messages), Phase 3 (Attachments/Notifications/AuditLogs), and Phase 4 (Organizations & Members)",
-    "version": "1.0.0",
+    "name": "Teams Platform API - Phase 1, 2, 3, 4, 5",
+    "description": "Complete API collection for Teams collaboration platform.\n\n**Phases:**\n- Phase 1 – Auth & Users\n- Phase 2 – Teams / Channels / Messages\n- Phase 3 – Attachments / Notifications / Audit Logs\n- Phase 4 – Organizations & Members\n- Phase 5 – Unified Chat (REST + WebSocket/STOMP)\n\n**WebSocket quick-start (Phase 5):**\n1. Connect to `ws://localhost:8080/api/v1/ws` (SockJS fallback also available)\n2. In the STOMP CONNECT frame add header `Authorization: Bearer <token>`\n3. Subscribe to `/topic/conversations/{conversationId}`\n4. Send messages to `/app/conversations/{conversationId}/send` with JSON body `{\"content\":\"Hello!\"}`",
+    "version": "2.0.0",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -55,6 +55,18 @@
       "key": "member_user_id",
       "value": "2",
       "type": "string"
+    },
+    {
+      "key": "conversation_id",
+      "value": "1",
+      "type": "string",
+      "description": "ID of the active conversation (set automatically by the 'Start Direct Conversation' test script)"
+    },
+    {
+      "key": "target_user_id",
+      "value": "2",
+      "type": "string",
+      "description": "ID of the user to start a direct conversation with"
     }
   ],
   "item": [
@@ -291,7 +303,7 @@
             ],
             "body": {
               "mode": "raw",
-                "raw": "{\"name\": \"Engineering Team\", \"description\": \"Main engineering team\", \"isPublic\": true, \"organization_id\": {{organization_id}}}"
+              "raw": "{\"name\": \"Engineering Team\", \"description\": \"Main engineering team\", \"isPublic\": true, \"organization_id\": {{organization_id}}}"
             },
             "url": {
               "raw": "{{base_url}}/teams",
@@ -442,7 +454,8 @@
           "response": []
         }
       ]
-    },{
+    },
+    {
       "name": "PHASE 2 - Channels Management",
       "item": [
         {
@@ -468,9 +481,7 @@
           "name": "Get Channel by ID",
           "request": {
             "method": "GET",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/channels/{{team_id}}/{{channel_id}}",
               "host": ["{{base_url}}"],
@@ -482,17 +493,12 @@
           "name": "Get Team Channels",
           "request": {
             "method": "GET",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/channels/team/{{team_id}}?page=0&size=10",
               "host": ["{{base_url}}"],
               "path": ["channels", "team", "{{team_id}}"],
-              "query": [
-                { "key": "page", "value": "0" },
-                { "key": "size", "value": "10" }
-              ]
+              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }]
             }
           }
         },
@@ -500,18 +506,12 @@
           "name": "Search Channels",
           "request": {
             "method": "GET",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/channels/{{team_id}}/search?query=general&page=0&size=10",
               "host": ["{{base_url}}"],
               "path": ["channels", "{{team_id}}", "search"],
-              "query": [
-                { "key": "query", "value": "general" },
-                { "key": "page", "value": "0" },
-                { "key": "size", "value": "10" }
-              ]
+              "query": [{ "key": "query", "value": "general" }, { "key": "page", "value": "0" }, { "key": "size", "value": "10" }]
             }
           }
         },
@@ -538,9 +538,7 @@
           "name": "Delete Channel",
           "request": {
             "method": "DELETE",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/channels/{{team_id}}/{{channel_id}}",
               "host": ["{{base_url}}"],
@@ -552,9 +550,7 @@
           "name": "Add Channel Member",
           "request": {
             "method": "POST",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/channels/{{team_id}}/{{channel_id}}/members/2",
               "host": ["{{base_url}}"],
@@ -566,9 +562,7 @@
           "name": "Remove Channel Member",
           "request": {
             "method": "DELETE",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/channels/{{team_id}}/{{channel_id}}/members/2",
               "host": ["{{base_url}}"],
@@ -580,9 +574,7 @@
           "name": "Archive Channel",
           "request": {
             "method": "POST",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/channels/{{team_id}}/{{channel_id}}/archive",
               "host": ["{{base_url}}"],
@@ -594,9 +586,7 @@
           "name": "Unarchive Channel",
           "request": {
             "method": "POST",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
             "url": {
               "raw": "{{base_url}}/channels/{{team_id}}/{{channel_id}}/unarchive",
               "host": ["{{base_url}}"],
@@ -605,7 +595,8 @@
           }
         }
       ]
-    },{
+    },
+    {
       "name": "PHASE 3 - Notifications",
       "item": [
         {
@@ -905,11 +896,7 @@
               "raw": "{{base_url}}/organizations/search?query=acme&page=0&size=10",
               "host": ["{{base_url}}"],
               "path": ["organizations", "search"],
-              "query": [
-                { "key": "query", "value": "acme" },
-                { "key": "page", "value": "0" },
-                { "key": "size", "value": "10" }
-              ]
+              "query": [{ "key": "query", "value": "acme" }, { "key": "page", "value": "0" }, { "key": "size", "value": "10" }]
             }
           },
           "response": []
@@ -1114,6 +1101,241 @@
               "host": ["{{base_url}}"],
               "path": ["organizations", "{{organization_id}}", "members", "me", "leave"]
             }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "PHASE 5 - Unified Chat (REST)",
+      "description": "REST endpoints for the unified chat system.\n\nConversation types:\n- DIRECT  – 1-to-1 between two users\n- TEAM    – shared for all team members\n- CHANNEL – shared for all channel members\n\nAll endpoints require Authorization: Bearer <token>.\nThe 'Start Direct Conversation' request automatically saves the returned conversation_id for use in subsequent requests.",
+      "item": [
+        {
+          "name": "Start Direct Conversation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var code = pm.response.code;",
+                  "pm.test('Status is 201', function() {",
+                  "    pm.expect(code).to.equal(201);",
+                  "});",
+                  "if (code === 201) {",
+                  "    var data = pm.response.json().data;",
+                  "    pm.collectionVariables.set('conversation_id', data.id);",
+                  "    pm.test('conversation_id saved', function() {",
+                  "        pm.expect(data).to.have.property('id');",
+                  "        pm.expect(data.type).to.equal('DIRECT');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetUserId\": {{target_user_id}}\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/conversations/direct",
+              "host": ["{{base_url}}"],
+              "path": ["conversations", "direct"]
+            },
+            "description": "Creates a DIRECT conversation between the authenticated user and the target user. Returns the existing conversation if one already exists — no duplicates are created."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Team Conversation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function() {",
+                  "    pm.expect(pm.response.code).to.equal(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    var data = pm.response.json().data;",
+                  "    pm.collectionVariables.set('conversation_id', data.id);",
+                  "    pm.test('Type is TEAM', function() {",
+                  "        pm.expect(data.type).to.equal('TEAM');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/teams/{{team_id}}/conversation",
+              "host": ["{{base_url}}"],
+              "path": ["teams", "{{team_id}}", "conversation"]
+            },
+            "description": "Returns the TEAM conversation for the given team. Automatically created (with all current members) the first time it is requested. Caller must be a team member."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Channel Conversation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function() {",
+                  "    pm.expect(pm.response.code).to.equal(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    var data = pm.response.json().data;",
+                  "    pm.collectionVariables.set('conversation_id', data.id);",
+                  "    pm.test('Type is CHANNEL', function() {",
+                  "        pm.expect(data.type).to.equal('CHANNEL');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/channels/{{channel_id}}/conversation",
+              "host": ["{{base_url}}"],
+              "path": ["channels", "{{channel_id}}", "conversation"]
+            },
+            "description": "Returns the CHANNEL conversation for the given channel. Automatically created (with all current channel members) the first time it is requested. Requires channel membership or team membership on a public channel."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Conversation Messages",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function() {",
+                  "    pm.expect(pm.response.code).to.equal(200);",
+                  "});",
+                  "pm.test('Response has paginated content', function() {",
+                  "    var data = pm.response.json().data;",
+                  "    pm.expect(data).to.have.property('content');",
+                  "    pm.expect(data).to.have.property('totalElements');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/conversations/{{conversation_id}}/messages?page=0&size=20&sort=createdAt,desc",
+              "host": ["{{base_url}}"],
+              "path": ["conversations", "{{conversation_id}}", "messages"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" },
+                { "key": "sort", "value": "createdAt,desc" }
+              ]
+            },
+            "description": "Returns paginated messages for the given conversation. Caller must be a member of the conversation."
+          },
+          "response": []
+        },
+        {
+          "name": "Send Message (REST)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', function() {",
+                  "    pm.expect(pm.response.code).to.equal(201);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "    var data = pm.response.json().data;",
+                  "    pm.collectionVariables.set('message_id', data.id);",
+                  "    pm.test('Message saved with correct content', function() {",
+                  "        pm.expect(data).to.have.property('id');",
+                  "        pm.expect(data.content).to.equal('Hello from Postman!');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Hello from Postman!\",\n  \"replyToId\": null\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/conversations/{{conversation_id}}/messages",
+              "host": ["{{base_url}}"],
+              "path": ["conversations", "{{conversation_id}}", "messages"]
+            },
+            "description": "Saves a message in the conversation and returns the persisted MessageDto. For real-time delivery use the WebSocket endpoint instead (see the WebSocket folder below)."
+          },
+          "response": []
+        },
+        {
+          "name": "Send Reply Message (REST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"This is a reply!\",\n  \"replyToId\": {{message_id}}\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/conversations/{{conversation_id}}/messages",
+              "host": ["{{base_url}}"],
+              "path": ["conversations", "{{conversation_id}}", "messages"]
+            },
+            "description": "Sends a threaded reply to a specific message within the conversation. Set replyToId to the ID of the parent message."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "PHASE 5 - Unified Chat (WebSocket / STOMP)",
+      "description": "WebSocket real-time chat — STOMP over SockJS.\n\n## Connection\nConnect to: `ws://localhost:8080/api/v1/ws`\n(SockJS HTTP fallback: `http://localhost:8080/api/v1/ws`)\n\n## Authentication\nPass the JWT in the STOMP CONNECT frame:\n```\nCONNECT\nAuthorization: Bearer <access_token>\n```\n\n## Subscribe (receive messages)\n```\nSUBSCRIBE\ndestination:/topic/conversations/{conversationId}\n```\n\n## Send a message\n```\nSEND\ndestination:/app/conversations/{conversationId}/send\ncontent-type:application/json\n\n{\"content\":\"Hello!\",\"replyToId\":null}\n```\n\n## Payload (MessageDto broadcast)\n```json\n{\n  \"id\": 42,\n  \"content\": \"Hello!\",\n  \"sender\": { \"id\": 1, \"username\": \"alice\" },\n  \"conversationId\": 7,\n  \"replyToId\": null,\n  \"edited\": false,\n  \"createdAt\": \"2026-06-21T10:30:00\"\n}\n```\n\n> Postman supports native WebSocket testing (Postman ≥ 9). Use the **WebSocket Request** tab, connect to the URL above, and manually send the STOMP frames shown here, or use a STOMP client library in your frontend.",
+      "item": [
+        {
+          "name": "ℹ️  WebSocket – Connect & Subscribe",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/ws/info",
+              "host": ["{{base_url}}"],
+              "path": ["ws", "info"]
+            },
+            "description": "This is a placeholder to document the WebSocket connection.\n\nTo test WebSocket in Postman:\n1. Click **New** → **WebSocket Request**\n2. Enter URL: `ws://localhost:8080/api/v1/ws/websocket`\n3. Connect, then send the STOMP CONNECT frame:\n   ```\n   CONNECT\\nAuthorization:Bearer {{access_token}}\\n\\n\\0\n   ```\n4. Subscribe to `/topic/conversations/{{conversation_id}}`\n5. Send to `/app/conversations/{{conversation_id}}/send` with body `{\"content\":\"Hi!\"}`\n\nAlternatively use a browser STOMP client (e.g. stompit, @stomp/stompjs)."
           },
           "response": []
         }
