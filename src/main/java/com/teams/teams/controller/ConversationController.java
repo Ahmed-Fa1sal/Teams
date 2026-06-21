@@ -18,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,8 +28,11 @@ import org.springframework.web.bind.annotation.*;
         description = """
                 Unified chat system supporting three conversation types:
                 - **DIRECT** – private 1-to-1 conversation between two users
-                - **TEAM** – shared conversation for all members of a team
-                - **CHANNEL** – shared conversation tied to a specific channel
+                - **TEAM** – shared conversation automatically created with each team
+                - **CHANNEL** – shared conversation automatically created with each channel
+
+                TEAM and CHANNEL conversations are created automatically when the parent
+                entity is created. Use the GET endpoints below to retrieve them.
 
                 All endpoints require a valid JWT Bearer token.
                 Real-time messaging is available via WebSocket/STOMP at `/ws`
@@ -42,16 +46,16 @@ public class ConversationController {
     private final CurrentUserService currentUserService;
 
     // -------------------------------------------------------------------------
-    // Create / retrieve conversations
+    // DIRECT conversation
     // -------------------------------------------------------------------------
 
     @PostMapping("/conversations/direct")
     @Operation(
             summary = "Start a direct (1-to-1) conversation",
             description = """
-                    Creates a DIRECT conversation between the authenticated user and the target user.
-                    If a direct conversation between these two users already exists it is returned
-                    instead of creating a duplicate.
+                    Creates a DIRECT conversation between the authenticated user and the target
+                    user. If a direct conversation between these two users already exists, it is
+                    returned instead of creating a duplicate.
                     """
     )
     @ApiResponses({
@@ -67,9 +71,7 @@ public class ConversationController {
     public ResponseEntity<?> createDirectConversation(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
-                    content = @Content(
-                            examples = @ExampleObject(value = "{\"targetUserId\": 2}")
-                    )
+                    content = @Content(examples = @ExampleObject(value = "{\"targetUserId\": 2}"))
             )
             @Valid @RequestBody CreateDirectConversationRequest request) {
 
@@ -80,65 +82,73 @@ public class ConversationController {
                 .body(com.teams.teams.dto.ApiResponse.created(conversation));
     }
 
+    // -------------------------------------------------------------------------
+    // TEAM conversation
+    // -------------------------------------------------------------------------
+
     @GetMapping("/teams/{teamId}/conversation")
+    @PreAuthorize("@teamSecurityService.isTeamMember(#teamId)")
     @Operation(
-            summary = "Get (or create) the team conversation",
+            summary = "Get the team conversation",
             description = """
-                    Returns the TEAM conversation associated with the given team.
-                    If one does not exist yet it is automatically created and all current
-                    team members are added as participants.
-                    The caller must be a member of the team.
+                    Returns the TEAM conversation that was automatically created when the team
+                    was created. The caller must be a member of the team.
                     """
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Team conversation returned",
                     content = @Content(schema = @Schema(implementation = ConversationDto.class))),
-            @ApiResponse(responseCode = "401", description = "Caller is not a team member or JWT is missing",
+            @ApiResponse(responseCode = "403", description = "Caller is not a team member",
                     content = @Content(schema = @Schema(implementation = com.teams.teams.dto.ApiResponse.class))),
-            @ApiResponse(responseCode = "404", description = "Team not found",
+            @ApiResponse(responseCode = "404", description = "Team or its conversation not found",
                     content = @Content(schema = @Schema(implementation = com.teams.teams.dto.ApiResponse.class)))
     })
     public ResponseEntity<?> getTeamConversation(
             @Parameter(description = "ID of the team", example = "1", required = true)
             @PathVariable Long teamId) {
 
-        Long requesterId = currentUserService.getCurrentUserId();
-        ConversationDto conversation = conversationService.getOrCreateTeamConversation(teamId, requesterId);
-        return ResponseEntity.ok(com.teams.teams.dto.ApiResponse.success("Team conversation retrieved", conversation));
+        ConversationDto conversation = conversationService.getTeamConversation(teamId);
+        return ResponseEntity.ok(
+                com.teams.teams.dto.ApiResponse.success("Team conversation retrieved", conversation));
     }
 
+    // -------------------------------------------------------------------------
+    // CHANNEL conversation
+    // -------------------------------------------------------------------------
+
     @GetMapping("/channels/{channelId}/conversation")
+    @PreAuthorize("@conversationSecurity.canAccessChannelConversation(#channelId)")
     @Operation(
-            summary = "Get (or create) the channel conversation",
+            summary = "Get the channel conversation",
             description = """
-                    Returns the CHANNEL conversation associated with the given channel.
-                    If one does not exist yet it is automatically created and all current
-                    channel members are added as participants.
-                    Access requires channel membership, or team membership when the channel is public.
+                    Returns the CHANNEL conversation that was automatically created when the
+                    channel was created.
+                    Access requires channel membership, or team membership on a public channel.
                     """
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Channel conversation returned",
                     content = @Content(schema = @Schema(implementation = ConversationDto.class))),
-            @ApiResponse(responseCode = "401", description = "Caller does not have access to this channel",
+            @ApiResponse(responseCode = "403", description = "Caller does not have access to this channel",
                     content = @Content(schema = @Schema(implementation = com.teams.teams.dto.ApiResponse.class))),
-            @ApiResponse(responseCode = "404", description = "Channel not found",
+            @ApiResponse(responseCode = "404", description = "Channel or its conversation not found",
                     content = @Content(schema = @Schema(implementation = com.teams.teams.dto.ApiResponse.class)))
     })
     public ResponseEntity<?> getChannelConversation(
             @Parameter(description = "ID of the channel", example = "1", required = true)
             @PathVariable Long channelId) {
 
-        Long requesterId = currentUserService.getCurrentUserId();
-        ConversationDto conversation = conversationService.getOrCreateChannelConversation(channelId, requesterId);
-        return ResponseEntity.ok(com.teams.teams.dto.ApiResponse.success("Channel conversation retrieved", conversation));
+        ConversationDto conversation = conversationService.getChannelConversation(channelId);
+        return ResponseEntity.ok(
+                com.teams.teams.dto.ApiResponse.success("Channel conversation retrieved", conversation));
     }
 
     // -------------------------------------------------------------------------
-    // Messages within a conversation
+    // Messages
     // -------------------------------------------------------------------------
 
     @GetMapping("/conversations/{conversationId}/messages")
+    @PreAuthorize("@conversationSecurity.isConversationMember(#conversationId)")
     @Operation(
             summary = "Get messages in a conversation",
             description = """
@@ -150,7 +160,7 @@ public class ConversationController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Page of messages returned"),
-            @ApiResponse(responseCode = "401", description = "Caller is not a conversation member",
+            @ApiResponse(responseCode = "403", description = "Caller is not a conversation member",
                     content = @Content(schema = @Schema(implementation = com.teams.teams.dto.ApiResponse.class))),
             @ApiResponse(responseCode = "404", description = "Conversation not found",
                     content = @Content(schema = @Schema(implementation = com.teams.teams.dto.ApiResponse.class)))
@@ -160,14 +170,14 @@ public class ConversationController {
             @PathVariable Long conversationId,
             @Parameter(hidden = true) Pageable pageable) {
 
-        Long userId = currentUserService.getCurrentUserId();
         Page<MessageDto> messages = conversationService.getConversationMessages(
-                conversationId, userId, pageable);
+                conversationId, pageable);
         return ResponseEntity.ok(
                 com.teams.teams.dto.ApiResponse.success("Messages retrieved successfully", messages));
     }
 
     @PostMapping("/conversations/{conversationId}/messages")
+    @PreAuthorize("@conversationSecurity.isConversationMember(#conversationId)")
     @Operation(
             summary = "Send a message to a conversation",
             description = """
@@ -185,7 +195,7 @@ public class ConversationController {
                     content = @Content(schema = @Schema(implementation = MessageDto.class))),
             @ApiResponse(responseCode = "400", description = "Blank content or invalid replyToId",
                     content = @Content(schema = @Schema(implementation = com.teams.teams.dto.ApiResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Caller is not a conversation member",
+            @ApiResponse(responseCode = "403", description = "Caller is not a conversation member",
                     content = @Content(schema = @Schema(implementation = com.teams.teams.dto.ApiResponse.class))),
             @ApiResponse(responseCode = "404", description = "Conversation or reply-to message not found",
                     content = @Content(schema = @Schema(implementation = com.teams.teams.dto.ApiResponse.class)))

@@ -16,6 +16,7 @@ import java.util.Set;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ChannelDto {
     private Long id;
+    private Long conversationId;
     private Long teamId;
     private String teamName;
     private String name;

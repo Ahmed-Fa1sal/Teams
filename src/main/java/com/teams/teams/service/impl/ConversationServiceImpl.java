@@ -29,12 +29,13 @@ public class ConversationServiceImpl implements ConversationService {
     private final ConversationRepository conversationRepository;
     private final ConversationMemberRepository conversationMemberRepository;
     private final UserRepository userRepository;
-    private final TeamRepository teamRepository;
-    private final TeamMemberRepository teamMemberRepository;
-    private final ChannelRepository channelRepository;
     private final MessageRepository messageRepository;
     private final UserService userService;
     private final MessageService messageService;
+
+    // -------------------------------------------------------------------------
+    // DIRECT
+    // -------------------------------------------------------------------------
 
     @Override
     public ConversationDto createDirectConversation(Long requesterId, Long targetUserId) {
@@ -61,75 +62,97 @@ public class ConversationServiceImpl implements ConversationService {
                 });
     }
 
+    // -------------------------------------------------------------------------
+    // Auto-creation — called by TeamServiceImpl / ChannelServiceImpl
+    // -------------------------------------------------------------------------
+
     @Override
-    public ConversationDto getOrCreateTeamConversation(Long teamId, Long requesterId) {
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new ResourceNotFoundException("Team not found with id: " + teamId));
+    public ConversationDto createTeamConversation(Team team) {
+        Conversation conversation = Conversation.builder()
+                .name(team.getName())
+                .type(ConversationType.TEAM)
+                .team(team)
+                .isGroup(true)
+                .build();
+        Conversation saved = conversationRepository.save(conversation);
+        team.getMembers().forEach(tm -> addMember(saved, tm.getUser()));
+        return toConversationDto(saved);
+    }
 
-        if (!teamMemberRepository.existsByTeamIdAndUserId(teamId, requesterId)) {
-            throw new UnauthorizedException("You are not a member of this team");
-        }
+    @Override
+    public ConversationDto createChannelConversation(Channel channel) {
+        Conversation conversation = Conversation.builder()
+                .name(channel.getName())
+                .type(ConversationType.CHANNEL)
+                .channel(channel)
+                .isGroup(true)
+                .build();
+        Conversation saved = conversationRepository.save(conversation);
+        channel.getMembers().forEach(user -> addMember(saved, user));
+        return toConversationDto(saved);
+    }
 
+    // -------------------------------------------------------------------------
+    // Member sync — called by TeamServiceImpl / ChannelServiceImpl
+    // -------------------------------------------------------------------------
+
+    @Override
+    public void addMemberToTeamConversation(Long teamId, User user) {
+        conversationRepository.findByTeamId(teamId)
+                .ifPresent(conv -> addMember(conv, user));
+    }
+
+    @Override
+    public void removeMemberFromTeamConversation(Long teamId, User user) {
+        conversationRepository.findByTeamId(teamId)
+                .ifPresent(conv -> removeMember(conv, user));
+    }
+
+    @Override
+    public void addMemberToChannelConversation(Long channelId, User user) {
+        conversationRepository.findByChannelId(channelId)
+                .ifPresent(conv -> addMember(conv, user));
+    }
+
+    @Override
+    public void removeMemberFromChannelConversation(Long channelId, User user) {
+        conversationRepository.findByChannelId(channelId)
+                .ifPresent(conv -> removeMember(conv, user));
+    }
+
+    // -------------------------------------------------------------------------
+    // Read — auth enforced upstream via @PreAuthorize
+    // -------------------------------------------------------------------------
+
+    @Override
+    @Transactional(readOnly = true)
+    public ConversationDto getTeamConversation(Long teamId) {
         return conversationRepository.findByTeamId(teamId)
                 .map(this::toConversationDto)
-                .orElseGet(() -> {
-                    Conversation conversation = Conversation.builder()
-                            .name(team.getName())
-                            .type(ConversationType.TEAM)
-                            .team(team)
-                            .isGroup(true)
-                            .build();
-                    Conversation saved = conversationRepository.save(conversation);
-                    teamMemberRepository.findByTeamId(teamId).forEach(tm -> addMember(saved, tm.getUser()));
-                    return toConversationDto(saved);
-                });
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No conversation found for team: " + teamId));
     }
 
     @Override
-    public ConversationDto getOrCreateChannelConversation(Long channelId, Long requesterId) {
-        Channel channel = channelRepository.findById(channelId)
-                .orElseThrow(() -> new ResourceNotFoundException("Channel not found with id: " + channelId));
-
-        boolean isChannelMember = channel.getMembers().stream()
-                .anyMatch(u -> u.getId().equals(requesterId));
-        boolean isTeamMember = teamMemberRepository.existsByTeamIdAndUserId(
-                channel.getTeam().getId(), requesterId);
-
-        if (!isChannelMember && !(channel.getIsPublic() && isTeamMember)) {
-            throw new UnauthorizedException("You do not have access to this channel");
-        }
-
+    @Transactional(readOnly = true)
+    public ConversationDto getChannelConversation(Long channelId) {
         return conversationRepository.findByChannelId(channelId)
                 .map(this::toConversationDto)
-                .orElseGet(() -> {
-                    Conversation conversation = Conversation.builder()
-                            .name(channel.getName())
-                            .type(ConversationType.CHANNEL)
-                            .channel(channel)
-                            .isGroup(true)
-                            .build();
-                    Conversation saved = conversationRepository.save(conversation);
-                    channel.getMembers().forEach(u -> addMember(saved, u));
-                    return toConversationDto(saved);
-                });
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No conversation found for channel: " + channelId));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public ConversationDto getConversationById(Long conversationId, Long userId) {
-        Conversation conversation = loadConversation(conversationId);
-        requireMember(conversationId, userId);
-        return toConversationDto(conversation);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<MessageDto> getConversationMessages(Long conversationId, Long userId, Pageable pageable) {
+    public Page<MessageDto> getConversationMessages(Long conversationId, Pageable pageable) {
         loadConversation(conversationId);
-        requireMember(conversationId, userId);
         return messageRepository.findByConversationIdAndDeletedFalse(conversationId, pageable)
                 .map(messageService::toMessageDto);
     }
+
+    // -------------------------------------------------------------------------
+    // Send — membership check kept here for the WebSocket path
+    // -------------------------------------------------------------------------
 
     @Override
     public MessageDto sendMessage(Long conversationId, SendChatMessageRequest request, Long senderId) {
@@ -159,6 +182,10 @@ public class ConversationServiceImpl implements ConversationService {
         return messageService.toMessageDto(saved);
     }
 
+    // -------------------------------------------------------------------------
+    // Mapper
+    // -------------------------------------------------------------------------
+
     @Override
     @Transactional(readOnly = true)
     public ConversationDto toConversationDto(Conversation conversation) {
@@ -180,6 +207,10 @@ public class ConversationServiceImpl implements ConversationService {
                 .build();
     }
 
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
     private Conversation loadConversation(Long conversationId) {
         return conversationRepository.findById(conversationId)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -198,13 +229,19 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     private void addMember(Conversation conversation, User user) {
-        if (!conversationMemberRepository.existsByConversationIdAndUserId(conversation.getId(), user.getId())) {
-            ConversationMember member = ConversationMember.builder()
+        if (!conversationMemberRepository.existsByConversationIdAndUserId(
+                conversation.getId(), user.getId())) {
+            conversationMemberRepository.save(ConversationMember.builder()
                     .conversation(conversation)
                     .user(user)
                     .joinedAt(LocalDateTime.now())
-                    .build();
-            conversationMemberRepository.save(member);
+                    .build());
         }
+    }
+
+    private void removeMember(Conversation conversation, User user) {
+        conversationMemberRepository
+                .findByConversationIdAndUserId(conversation.getId(), user.getId())
+                .ifPresent(conversationMemberRepository::delete);
     }
 }

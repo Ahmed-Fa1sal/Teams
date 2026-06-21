@@ -1108,7 +1108,7 @@
     },
     {
       "name": "PHASE 5 - Unified Chat (REST)",
-      "description": "REST endpoints for the unified chat system.\n\nConversation types:\n- DIRECT  – 1-to-1 between two users\n- TEAM    – shared for all team members\n- CHANNEL – shared for all channel members\n\nAll endpoints require Authorization: Bearer <token>.\nThe 'Start Direct Conversation' request automatically saves the returned conversation_id for use in subsequent requests.",
+      "description": "REST endpoints for the unified chat system.\n\nConversation types:\n- DIRECT  – 1-to-1 between two users, created on demand via POST /conversations/direct\n- TEAM    – automatically created when a team is created; retrieved via GET /teams/{id}/conversation\n- CHANNEL – automatically created when a channel is created; retrieved via GET /channels/{id}/conversation\n\nAll endpoints require Authorization: Bearer <token>.\nThe 'Start Direct Conversation' and 'Get Team/Channel Conversation' requests automatically save the returned conversation_id for use in subsequent requests.",
       "item": [
         {
           "name": "Start Direct Conversation",
@@ -1182,7 +1182,7 @@
               "host": ["{{base_url}}"],
               "path": ["teams", "{{team_id}}", "conversation"]
             },
-            "description": "Returns the TEAM conversation for the given team. Automatically created (with all current members) the first time it is requested. Caller must be a team member."
+            "description": "Returns the TEAM conversation that was automatically created when the team was created. Caller must be a team member."
           },
           "response": []
         },
@@ -1215,7 +1215,7 @@
               "host": ["{{base_url}}"],
               "path": ["channels", "{{channel_id}}", "conversation"]
             },
-            "description": "Returns the CHANNEL conversation for the given channel. Automatically created (with all current channel members) the first time it is requested. Requires channel membership or team membership on a public channel."
+            "description": "Returns the CHANNEL conversation that was automatically created when the channel was created. Requires channel membership or team membership on a public channel."
           },
           "response": []
         },

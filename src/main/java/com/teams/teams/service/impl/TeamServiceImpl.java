@@ -7,10 +7,12 @@ import com.teams.teams.dto.TeamMemberDto;
 import com.teams.teams.dto.UpdateTeamRequest;
 import com.teams.teams.exception.BadRequestException;
 import com.teams.teams.exception.ResourceNotFoundException;
+import com.teams.teams.repository.ConversationRepository;
 import com.teams.teams.repository.OrganizationRepository;
 import com.teams.teams.repository.TeamMemberRepository;
 import com.teams.teams.repository.TeamRepository;
 import com.teams.teams.repository.UserRepository;
+import com.teams.teams.service.ConversationService;
 import com.teams.teams.service.NotificationService;
 import com.teams.teams.service.TeamService;
 import com.teams.teams.service.UserService;
@@ -35,6 +37,8 @@ public class TeamServiceImpl implements TeamService {
     private final UserService userService;
     private final OrganizationRepository organizationRepository;
     private final NotificationService notificationService;
+    private final ConversationService conversationService;
+    private final ConversationRepository conversationRepository;
 
     @Override
     public TeamDto createTeam(CreateTeamRequest request, Long ownerId) {
@@ -60,6 +64,7 @@ public class TeamServiceImpl implements TeamService {
         team.addMember(owner, TeamMemberRole.OWNER);
 
         Team savedTeam = teamRepository.save(team);
+        conversationService.createTeamConversation(savedTeam);
 
         return toTeamDto(savedTeam);
     }
@@ -172,6 +177,7 @@ public class TeamServiceImpl implements TeamService {
                 .build();
 
         teamMemberRepository.save(member);
+        conversationService.addMemberToTeamConversation(teamId, user);
 
         notificationService.notifyUser(
                 userId,
@@ -199,8 +205,10 @@ public class TeamServiceImpl implements TeamService {
         }
 
         String teamName = member.getTeam().getName();
+        User removedUser = member.getUser();
 
         teamMemberRepository.delete(member);
+        conversationService.removeMemberFromTeamConversation(teamId, removedUser);
 
         notificationService.notifyUser(
                 userId,
@@ -242,8 +250,14 @@ public class TeamServiceImpl implements TeamService {
                 ? team.getMembers()
                 : teamMemberRepository.findByTeamId(team.getId());
 
+        Long conversationId = team.getId() == null ? null :
+                conversationRepository.findByTeamId(team.getId())
+                        .map(c -> c.getId())
+                        .orElse(null);
+
         return TeamDto.builder()
                 .id(team.getId())
+                .conversationId(conversationId)
                 .name(team.getName())
                 .description(team.getDescription())
                 .imageUrl(team.getImageUrl())
