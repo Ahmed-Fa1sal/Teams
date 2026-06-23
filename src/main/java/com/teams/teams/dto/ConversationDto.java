@@ -7,27 +7,22 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ChannelDto {
+public class ConversationDto {
     private Long id;
-    private Long conversationId;
-    private Long teamId;
-    private String teamName;
     private String name;
-    private String description;
-    private UserDto owner;
-    private Boolean isPublic;
-    private Boolean archived;
-    private Set<UserDto> members;
-    private Integer memberCount;
-    private Integer messageCount;
+    private String imageUrl;
+    private String type;
+    private Long teamId;
+    private Long channelId;
+    private Boolean isGroup;
+    private List<UserDto> members;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
-

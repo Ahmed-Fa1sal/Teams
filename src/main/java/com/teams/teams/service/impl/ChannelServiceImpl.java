@@ -9,9 +9,11 @@ import com.teams.teams.dto.CreateChannelRequest;
 import com.teams.teams.dto.UpdateChannelRequest;
 import com.teams.teams.exception.ResourceNotFoundException;
 import com.teams.teams.repository.ChannelRepository;
+import com.teams.teams.repository.ConversationRepository;
 import com.teams.teams.repository.TeamRepository;
 import com.teams.teams.repository.UserRepository;
 import com.teams.teams.service.ChannelService;
+import com.teams.teams.service.ConversationService;
 import com.teams.teams.service.NotificationService;
 import com.teams.teams.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,8 @@ public class ChannelServiceImpl implements ChannelService {
     private final UserRepository userRepository;
     private final UserService userService;
     private final NotificationService notificationService;
+    private final ConversationService conversationService;
+    private final ConversationRepository conversationRepository;
 
     @Override
     public ChannelDto createChannel(
@@ -64,6 +68,7 @@ public class ChannelServiceImpl implements ChannelService {
         channel.addMember(owner);
 
         Channel savedChannel = channelRepository.save(channel);
+        conversationService.createChannelConversation(savedChannel);
 
         return toChannelDto(savedChannel);
     }
@@ -166,6 +171,7 @@ public class ChannelServiceImpl implements ChannelService {
         channelRepository.save(channel);
 
         if (!alreadyMember) {
+            conversationService.addMemberToChannelConversation(channelId, user);
             notificationService.notifyUser(
                     userId,
                     actorId,
@@ -198,6 +204,7 @@ public class ChannelServiceImpl implements ChannelService {
         channelRepository.save(channel);
 
         if (wasMember) {
+            conversationService.removeMemberFromChannelConversation(channelId, user);
             notificationService.notifyUser(
                     userId,
                     actorId,
@@ -233,8 +240,14 @@ public class ChannelServiceImpl implements ChannelService {
             return null;
         }
 
+        Long conversationId = channel.getId() == null ? null :
+                conversationRepository.findByChannelId(channel.getId())
+                        .map(c -> c.getId())
+                        .orElse(null);
+
         return ChannelDto.builder()
                 .id(channel.getId())
+                .conversationId(conversationId)
                 .teamId(channel.getTeam().getId())
                 .teamName(channel.getTeam().getName())
                 .name(channel.getName())

@@ -125,7 +125,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Conversation not found with id: " + conversationId));
 
         Set<Long> recipientIds = conversation.getMembers().stream()
-                .map(User::getId)
+                .map(cm -> cm.getUser().getId())
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
         notifyUsers(recipientIds, actorId, type, title, message, entityId, entityType);
@@ -364,7 +364,7 @@ public class NotificationServiceImpl implements NotificationService {
             Conversation conversation = conversationRepository.findById(message.getConversation().getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Conversation not found with id: " + message.getConversation().getId()));
             return conversation.getMembers().stream()
-                    .map(User::getId)
+                    .map(cm -> cm.getUser().getId())
                     .collect(Collectors.toCollection(LinkedHashSet::new));
         }
 

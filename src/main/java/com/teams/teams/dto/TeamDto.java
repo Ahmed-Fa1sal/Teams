@@ -16,6 +16,7 @@ import java.util.Set;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TeamDto {
     private Long id;
+    private Long conversationId;
     private String name;
     private String description;
     private String imageUrl;
