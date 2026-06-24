@@ -126,6 +126,13 @@ public class ConversationServiceImpl implements ConversationService {
 
     @Override
     @Transactional(readOnly = true)
+    public Page<ConversationDto> getMyConversations(Long userId, Pageable pageable) {
+        return conversationRepository.findAllByMemberId(userId, pageable)
+                .map(this::toConversationDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public ConversationDto getTeamConversation(Long teamId) {
         return conversationRepository.findByTeamId(teamId)
                 .map(this::toConversationDto)

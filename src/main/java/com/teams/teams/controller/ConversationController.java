@@ -46,6 +46,39 @@ public class ConversationController {
     private final CurrentUserService currentUserService;
 
     // -------------------------------------------------------------------------
+    // MY conversations
+    // -------------------------------------------------------------------------
+
+    @GetMapping("/conversations/my")
+    @Operation(
+            summary = "Get all conversations for the authenticated user",
+            description = """
+                    Returns a paginated list of every conversation (DIRECT, TEAM, CHANNEL)
+                    in which the authenticated user is a member.
+
+                    Results are sorted by latest activity: the most recent non-deleted message
+                    timestamp takes precedence; conversations with no messages fall back to
+                    `updatedAt`.
+
+                    Pagination defaults: `page=0`, `size=20`
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Page of conversations returned"),
+            @ApiResponse(responseCode = "401", description = "Missing or invalid JWT token",
+                    content = @Content(schema = @Schema(implementation = com.teams.teams.dto.ApiResponse.class)))
+    })
+    public ResponseEntity<?> getMyConversations(
+            @Parameter(hidden = true) Pageable pageable) {
+
+        Long userId = currentUserService.getCurrentUserId();
+        Page<ConversationDto> page = conversationService.getMyConversations(userId, pageable);
+        return ResponseEntity.ok(
+                com.teams.teams.dto.ApiResponse.success("Conversations retrieved successfully",
+                        PagedResponse.of(page)));
+    }
+
+    // -------------------------------------------------------------------------
     // DIRECT conversation
     // -------------------------------------------------------------------------
 

@@ -26,6 +26,7 @@ public interface ConversationService {
     void removeMemberFromChannelConversation(Long channelId, User user);
 
     // READ — auth enforced by @PreAuthorize at controller level
+    Page<ConversationDto> getMyConversations(Long userId, Pageable pageable);
     ConversationDto getTeamConversation(Long teamId);
     ConversationDto getChannelConversation(Long channelId);
     Page<MessageDto> getConversationMessages(Long conversationId, Pageable pageable);
